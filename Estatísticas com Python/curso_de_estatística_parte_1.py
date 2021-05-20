@@ -363,17 +363,33 @@ O <b>HISTOGRAMA</b> é a representação gráfica de uma distribuição de frequ
 https://seaborn.pydata.org/
 """
 
+import seaborn as sns
 
+# função sns.displot()
+ax = sns.distplot(dados.Altura, kde = False)
 
+ax.figure.set_size_inches(12, 6)
+ax.set_title('Distribuição de Frenquências - Altura', fontsize = 18)
+ax.set_xlabel('Metros', fontsize = 14)
 
+ax
 
+# função sns.displot()
+ax = sns.distplot(dados.Altura, kde = True) #default é True
 
+ax.figure.set_size_inches(12, 6)
+ax.set_title('Distribuição de Frenquências - Altura - KDE', fontsize = 18)
+ax.set_xlabel('Metros', fontsize = 14)
 
+ax
 
+# usando a pandas
+dados['Altura'].hist(bins = 50, figsize = (12, 6))
 
+# criando gráfico do nosso DataFrame
+dist_freq_quant_person
 
-
-
+dist_freq_quant_person['Frequência'].plot.bar(width = 1, color = 'blue', figsize = (12, 6), alpha = 0.2)
 
 """# <font color=green>3 MEDIDAS DE TENDÊNCIA CENTRAL</font>
 ***
