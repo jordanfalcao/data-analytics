@@ -310,6 +310,25 @@ dist_freq_quant_person
 # reorganizando o index
 dist_freq_quant_person.sort_index(ascending = False)
 
+"""# Teste de groupby"""
+
+# # percentual
+# percentual = pd.value_counts(pd.cut(x = dados.groupby('Sexo')['Renda'], bins = classes, labels=labels, include_lowest=True), normalize = True) * 100
+# percentual
+
+for keys, values in dados_test:
+  print(values)
+
+# frequência de cada classe
+
+dados_test['Renda'].agg(['min', 'max', 'sum', 'count', 'mean']).rename(index = {0: 'Masculino', 1: 'Feminino'})
+
+# crosstab() permite inserir stats function
+media = pd.crosstab(dados_test.Sexo, dados['Cor'], aggfunc = 'count', values = dados['Renda'])
+media.rename(index=sexo, inplace=True)
+media.rename(columns=cor, inplace=True)
+media
+
 """## <font color=green>2.3 Distribuição de frequências para variáveis quantitativas (classes de amplitude fixa)</font>
 ***
 
@@ -397,7 +416,18 @@ dist_freq_quant_person['Frequência'].plot.bar(width = 1, color = 'blue', figsiz
 ## DataFrame de exemplo
 """
 
-
+df = pd.DataFrame(data = {'Fulano': [8, 10, 4, 8, 6, 10, 8],
+                          'Beltrano': [10, 2, 0.5, 1, 3, 9.5, 10],
+                          'Sicrano': [7.5, 8, 7, 8, 8, 8.5, 7]},
+                 index = ['Matemática',
+                          'Português',
+                          'Inglês',
+                          'Geografia',
+                          'História',
+                          'Física',
+                          'Química'])
+df.rename_axis('Matérias', axis = 'columns', inplace = True)
+df
 
 """## <font color=green>3.1 Média aritmética</font>
 ***
@@ -413,13 +443,16 @@ $n$ = número de observações (registros)
 $X_i$ = valor da i-ésima observação (registro)
 """
 
+(8 + 10 + 4 + 8 + 6 + 10 + 8) / 7
 
+# média de uma variável
+df['Fulano'].mean()
 
+# média de uma linha
+dados['Renda'].mean()
 
-
-
-
-
+# média de uma variável por agrupamento
+dados.groupby(['Sexo'])[['Renda']].mean()
 
 """## <font color=green>3.2 Mediana</font>
 ***
@@ -457,34 +490,45 @@ Para obtermos a mediana de uma conjunto de dados devemos proceder da seguinte ma
 <img src='https://caelum-online-public.s3.amazonaws.com/1177-estatistica-parte1/01/img002.png' width='40%' style="float:left">
 """
 
+notas_fulano = df.Fulano
+notas_fulano
 
+notas_fulano = notas_fulano.sort_values()
+notas_fulano
 
+# atribui números aos índices e cria uma coluna ao índice anterior
+notas_fulano.reset_index()
 
+n = notas_fulano.shape[0]
+n
 
+# posição do elemento
+elemento_md = (n + 1) / 2
+int(elemento_md)
 
+# mediana
+notas_fulano.iloc[int(elemento_md) - 1]
 
-
-
-
-
-
-
-
+# mais prático
+notas_fulano.median()
 
 """### Exemplo 2 - n par
 
 <img src='https://caelum-online-public.s3.amazonaws.com/1177-estatistica-parte1/01/img003.png' width='50%' style="float:left">
 """
 
+notas_beltrano = df.Beltrano.sample(6, random_state = 101)
+notas_beltrano
 
+n = notas_beltrano.shape[0]
+n
 
+elemento_md = n / 2
+elemento_md
 
+# mediana
 
-
-
-
-
-
+notas_beltrano.median()
 
 
 
@@ -492,9 +536,10 @@ Para obtermos a mediana de uma conjunto de dados devemos proceder da seguinte ma
 
 """### Obtendo a mediana em nosso dataset"""
 
+dados.Renda.median()
 
-
-
+# default do quatile = 0.5
+dados['Renda'].quantile()
 
 """## <font color=green>3.3 Moda</font>
 ***
@@ -502,19 +547,22 @@ Para obtermos a mediana de uma conjunto de dados devemos proceder da seguinte ma
 Pode-se definir a moda como sendo o valor mais frequente de um conjunto de dados. A moda é bastante utilizada para dados qualitativos.
 """
 
+df
 
+# .mode() retorna a moda 
+df.mode()
 
+exemplo = pd.Series([1, 2, 2, 3, 4, 4, 5, 6, 6])
+exemplo
 
-
-
-
-
+# mais de uma moda
+exemplo.mode()
 
 """### Obtendo a moda em nosso dataset"""
 
+dados['Renda'].mode()
 
-
-
+dados.Altura.mode()
 
 """## <font color=green>3.4 Relação entre média, mediana e moda</font>
 ***
@@ -524,43 +572,77 @@ Pode-se definir a moda como sendo o valor mais frequente de um conjunto de dados
 ### Avaliando a variável RENDA
 """
 
+# displot da seaborn
+ax = sns.distplot(dados.Renda)
+ax.figure.set_size_inches(12, 6)
+ax
+
+# query para visualizarmos area desejada
+# aparenta uma assimetria à direita
+ax = sns.distplot(dados.query('Renda < 20000').Renda)
+ax.figure.set_size_inches(12, 6)
 
 
+ax
 
+Moda = dados.Renda.mode()[0]
+Moda
 
+Mediana = dados.Renda.median()
+Mediana
 
+Media = dados.Renda.mean()
+Media
 
-
-
-
+# se der True, assimetria À direita
+Moda < Mediana < Media
 
 """***
 
 ### Avaliando a variável ALTURA
 """
 
+# gráfico com característica simétrica
+ax = sns.distplot(dados.Altura)
+ax.figure.set_size_inches(12, 6)
+ax
 
+# muiltimodal
+Moda = dados.Altura.mode()
+Moda
 
+# apenas para observação
+dados.Altura.mode().median()
 
+# apenas para observação
+dados.Altura.mode().mean()
 
+Mediana = dados.Altura.median()
+Mediana
 
-
-
+Media = dados.Altura.mean()
+Media
 
 """***
 
 ### Avaliando a variável ANOS DE ESTUDO
 """
 
+# c omportamento semelhante simetria à esquerda
+ax = sns.distplot(dados['Anos de Estudo'], bins = 17)
+ax.figure.set_size_inches(12, 6)
+ax
 
+Moda = dados['Anos de Estudo'].mode()
+Moda
 
+Mediana = dados['Anos de Estudo'].median()
+Mediana
 
+Media = dados['Anos de Estudo'].mean()
+Media
 
-
-
-
-
-
+Moda[0] > Mediana > Media
 
 """# <font color=green>4 MEDIDAS SEPARATRIZES</font>
 ***
@@ -571,17 +653,29 @@ Pode-se definir a moda como sendo o valor mais frequente de um conjunto de dados
 Há uma série de medidas de posição semelhantes na sua concepção à mediana, embora não sejam medidas de tendência central. Como se sabe, a mediana divide a distribuição em duas partes iguais quanto ao número de elementos de cada parte. Já os quartis permitem dividir a distribuição em quatro partes iguais quanto ao número de elementos de cada uma; os decis em dez partes e os centis em cem partes iguais.
 """
 
+# 1º quartil, mediana e 3º quartil
+dados['Renda'].quantile([0.25, 0.5, 0.75])
 
+[i/10 for i in range(1, 10)]
 
+# decis
+dados['Renda'].quantile([i/10 for i in range(1, 10)])
 
+# percentis
+dados['Renda'].quantile([i/100 for i in range(1, 100)])
 
+ax = sns.distplot(dados.Idade,
+                  hist_kws = {'cumulative': True},
+                  kde_kws = {'cumulative': True},
+                  bins = 10)
+ax.figure.set_size_inches(14, 6)
+ax.set_title('Distribuição de Frequências Acumulada', fontsize=18)
+ax.set_ylabel('Acumulado', fontsize=14)
+ax.set_xlabel('Anos', fontsize=14)
+ax
 
-
-
-
-
-
-
+# comparando com os decis de Idade
+dados['Idade'].quantile([i/10 for i in range(1, 10)])
 
 """## <font color=green>4.2 Box-plot</font>
 ***
@@ -591,7 +685,12 @@ O box plot dá uma idéia da posição, dispersão, assimetria, caudas e dados d
 <img src='https://caelum-online-public.s3.amazonaws.com/1177-estatistica-parte1/01/img005.png' width='65%'>
 """
 
+ax = sns.boxplot()
 
+ax.figure.set_size_inches(12, 4)
+ax.set_title('Altura', fontsize = 18)
+ax.set_xlabel('Metros', fontsize = 14)
+ ax
 
 
 
