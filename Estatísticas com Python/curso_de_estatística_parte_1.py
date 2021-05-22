@@ -316,18 +316,18 @@ dist_freq_quant_person.sort_index(ascending = False)
 # percentual = pd.value_counts(pd.cut(x = dados.groupby('Sexo')['Renda'], bins = classes, labels=labels, include_lowest=True), normalize = True) * 100
 # percentual
 
-for keys, values in dados_test:
-  print(values)
+# for keys, values in dados_test:
+#   print(values)
 
 # frequência de cada classe
 
-dados_test['Renda'].agg(['min', 'max', 'sum', 'count', 'mean']).rename(index = {0: 'Masculino', 1: 'Feminino'})
+# dados_test['Renda'].agg(['min', 'max', 'sum', 'count', 'mean']).rename(index = {0: 'Masculino', 1: 'Feminino'})
 
-# crosstab() permite inserir stats function
-media = pd.crosstab(dados_test.Sexo, dados['Cor'], aggfunc = 'count', values = dados['Renda'])
-media.rename(index=sexo, inplace=True)
-media.rename(columns=cor, inplace=True)
-media
+# # crosstab() permite inserir stats function
+# media = pd.crosstab(dados_test.Sexo, dados['Cor'], aggfunc = 'count', values = dados['Renda'])
+# media.rename(index=sexo, inplace=True)
+# media.rename(columns=cor, inplace=True)
+# media
 
 """## <font color=green>2.3 Distribuição de frequências para variáveis quantitativas (classes de amplitude fixa)</font>
 ***
@@ -685,22 +685,59 @@ O box plot dá uma idéia da posição, dispersão, assimetria, caudas e dados d
 <img src='https://caelum-online-public.s3.amazonaws.com/1177-estatistica-parte1/01/img005.png' width='65%'>
 """
 
-ax = sns.boxplot()
+# boxplot da variável 'Altura' no DF 'dados'
+ax = sns.boxplot(x = 'Altura', data = dados, orient = 'h')
 
 ax.figure.set_size_inches(12, 4)
 ax.set_title('Altura', fontsize = 18)
 ax.set_xlabel('Metros', fontsize = 14)
- ax
 
+ax
 
+# boxplot das variáveis 'Altura' por cada 'Sexo' no DF 'dados'
+ax = sns.boxplot(x = 'Altura', y = 'Sexo', data = dados, orient = 'h')
 
+ax.figure.set_size_inches(12, 4)
+ax.set_title('Altura por Sexo', fontsize = 18)
+ax.set_xlabel('Metros', fontsize = 14)
 
+ax
 
+# query para visualizar melhor
+ax = sns.boxplot(x = 'Renda', data = dados.query('Renda < 10000'), orient = 'h')
 
+ax.figure.set_size_inches(12, 4)
+ax.set_title('Renda', fontsize = 18)
+ax.set_xlabel('R$', fontsize = 14)
 
+ax
 
+# boxplot da variável 'Renda' por Sexo
+ax = sns.boxplot(x = 'Renda', y = 'Sexo', data = dados.query('Renda < 10000'), orient = 'h')
 
+ax.figure.set_size_inches(12, 4)
+ax.set_title('Renda', fontsize = 18)
+ax.set_xlabel('R$', fontsize = 14)
 
+ax
+
+# boxplot da variável 'Anos de Estudos'
+ax = sns.boxplot(x = 'Anos de Estudo', data = dados, orient = 'h')
+
+ax.figure.set_size_inches(12, 4)
+ax.set_title('Anos de Estudos', fontsize = 18)
+ax.set_xlabel('Anos', fontsize = 14)
+
+ax
+
+# boxplot da variável 'Anos de Estudos' por 'Sexo'
+ax = sns.boxplot(x = 'Anos de Estudo', y = 'Sexo', data = dados, orient = 'h')
+
+ax.figure.set_size_inches(12, 4)
+ax.set_title('Anos de Estudos', fontsize = 18)
+ax.set_xlabel('Anos', fontsize = 14)
+
+ax
 
 """<img src='https://caelum-online-public.s3.amazonaws.com/1177-estatistica-parte1/01/img006.png' width='80%'>
 
@@ -716,23 +753,41 @@ Embora as medidas de posição forneçam uma sumarização bastante importante d
 # $$DM = \frac 1n\sum_{i=1}^{n}|X_i-\bar{X}|$$
 """
 
+df
 
+notas_fulano = df[['Fulano']]
+notas_fulano
 
+nota_media_fulano = notas_fulano.mean()[0]
+nota_media_fulano
 
+# criando uma nova variável
+notas_fulano['Desvio'] = notas_fulano['Fulano'] - nota_media_fulano
+notas_fulano
 
+# pegamos apenas os valores positivos, senão somatório seria 0
+notas_fulano['Desvio'].sum()
 
+# pega-se apenas os valroes absolutos
+notas_fulano['|Desvio|'] = notas_fulano['Desvio'].abs()
+notas_fulano
 
+# dispersão
+ax = notas_fulano['Fulano'].plot(style = 'o')
 
+ax.figure.set_size_inches(14, 6)
+ax.hlines(y = nota_media_fulano, xmin = 0, xmax = notas_fulano.shape[0] - 1, colors = 'red')
+for i in range(notas_fulano.shape[0]):
+    ax.vlines(x = i, ymin = nota_media_fulano, ymax = notas_fulano['Fulano'][i], linestyle='dashed')
 
+ax
 
+# média dos desvios
+notas_fulano['|Desvio|'].mean()
 
-
-
-
-
-
-
-
+# Desvio Médio Absoluto(Mean Absolute Deviation) '.mad()' calcula rapidamente
+desvio_medio_absoluto = notas_fulano['Fulano'].mad()
+desvio_medio_absoluto
 
 """## <font color=green>5.2 Variância</font>
 ***
@@ -750,11 +805,15 @@ A variância é construída a partir das diferenças entre cada observação e a
 # $$S^2 = \frac 1{n-1}\sum_{i=1}^{n}(X_i-\bar{X})^2$$
 """
 
+notas_fulano['(Desvio)^2'] = notas_fulano['Desvio'].pow(2)
+notas_fulano
 
+# variância amostral
+notas_fulano['(Desvio)^2'].sum() / (len(notas_fulano) - 1)
 
-
-
-
+# diretamente pelo pandas
+variancia = notas_fulano['Fulano'].var()
+variancia
 
 """## <font color=green>5.3 Desvio padrão</font>
 ***
@@ -770,17 +829,25 @@ Uma das restrições da variância é o fato de fornecer medidas em quadrados da
 # $$S = \sqrt{\frac 1{n-1}\sum_{i=1}^{n}(X_i-\bar{X})^2} \Longrightarrow S = \sqrt{S^2}$$
 """
 
+# Desvio Padrão é a raiz quadrada da variância
+np.sqrt(variancia)
 
+# pelo pandas
+desvio_padrao = notas_fulano['Fulano'].std()
+desvio_padrao
 
+df
 
+# Fulano e Sicrano tem as mesmas médias
+df.mean()
 
+# Fulano e Sicrano tem as mesmas medianas
+df.median()
 
+# Fulano e Sicrano tem a mesma moda
+df.mode()
 
+# porém Sicrano tem menos dispersão
+df.std()
 
-
-
-
-
-
-
-
+df.var()
