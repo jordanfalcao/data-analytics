@@ -195,7 +195,7 @@ freq_perc_renda
 
 """### Construa um gráfico de barras para visualizar as informações da tabela de frequências acima"""
 
-freq_perc_renda['Frequência'].plot.bar(width = 0.5, figsize = (14, 6), legend = True)
+freq_perc_renda['Frequência'].plot.bar(width = 0.5, figsize = (14, 6), legend = True, rot = 0)
 
 """> ### Conclusões
 
@@ -224,7 +224,7 @@ h_altura
 
 """> ### Conclusões
 
-- Em relação à Idade, vemos que a maioria dos(as) chefes de família concentram-sem em torno dos 40 anos.
+- Em relação à Idade, vemos que a maioria dos(as) chefes de família concentram-se em torno dos 40 anos.
 
 - Nota-se, também, que a altura tem uma concentração elevada próximo a 1,7m.
 
@@ -312,7 +312,7 @@ freq_sexo_cor = freq_sexo_cor.style.set_table_attributes("style='display:inline'
 
 freq_sexo_cor
 
-percnt_sexo_cor = pd.crosstab(dados.Sexo, dados['Cor'], normalize = True) * 100
+percnt_sexo_cor = (pd.crosstab(dados.Sexo, dados['Cor'], normalize = True) * 100).round(2)
 percnt_sexo_cor.rename(index = sexo, inplace=True)
 percnt_sexo_cor.rename(columns = cor, inplace=True)
 percnt_sexo_cor = percnt_sexo_cor.style.set_table_attributes("style='display:inline'").set_caption("Percentual - Sexo x Cor")
@@ -349,7 +349,7 @@ dados['Renda'].var()
 
 dados.Renda.std()
 
-"""### Todos resultados co apenas um método"""
+"""### Todos resultados com apenas um método"""
 
 # pode ter vários resultados em um único método
 dados.Renda.agg(['mean', 'median', 'count', 'min', 'max', 'std', 'var', 'mad'])
@@ -369,18 +369,27 @@ renda_sexo_cor
 
 """> ### Conclusões
 
-Escreva suas conclusões aqui...
+- No geral, os homens chefes de família ganham em média mais que as mulheres.
+
+- Nota-se que a Cor 'Indígena' é a única média que na qual 'Feminino' é maior que a 'Masculino', provavelmente alvancada pelo valor máximo de R$ 120.000,00.
 
 ### Obtenha as medidas de dispersão da variável RENDA segundo SEXO e COR
 #### <font color='blue'>Destaque os pontos mais importante que você observa nas tabulações</font>
 #### <font color='red'>O parâmento <i>aggfunc</i> da função <i>crosstab()</i> pode receber uma lista de funções. Exemplo: <i>aggfunc = {'mad', 'var', 'std'}</i></font>
 """
 
-
+renda2_sexo_cor = pd.crosstab(dados.Cor, dados['Sexo'], aggfunc = {'var', 'std', 'mad'}, values = dados['Renda']).round(2)
+renda2_sexo_cor.rename(index = cor, inplace = True)
+renda2_sexo_cor.rename(columns = sexo, inplace = True)
+renda2_sexo_cor
 
 """> ### Conclusões
 
-Escreva suas conclusões aqui...
+- Nota-se um desvio absurdo em 'Indígena e Feminino', provavelmente devido ao valor máximo de renda em R$ 120.000,00, que destoa das demais.
+
+- É notório, também, que a dispersão é maior no sexo Masculinio que no Feminino, com exceção do caso citado acima.
+
+- A cor Preta é a que aprenseta a menor dispersão de Renda, enquanto a cor Amarela aprensenta a maior.
 
 ### Construa um box plot da variável RENDA segundo SEXO e COR
 #### <font color='blue'>É possível verificar algum comportamento diferenciado no rendimento entre os grupos de pessoas analisados? Avalie o gráfico e destaque os pontos mais importantes.</font>
@@ -389,11 +398,35 @@ Escreva suas conclusões aqui...
 #### Mais informações: https://seaborn.pydata.org/generated/seaborn.boxplot.html
 """
 
+box_renda = sns.boxplot(x = 'Renda', y = 'Cor', hue = 'Sexo', data=dados.query('Renda < 10000'), orient = 'h')
+box_renda.figure.set_size_inches(14, 8)
+box_renda.set_title('Renda por Cor e Sexo', fontsize = 18)
+box_renda.set_xlabel('Reais - R$', fontsize = 14)
+box_renda.set_yticklabels(['Indígena', 'Branca',  'Preta', 'Amarela', 'Parda'])
 
+#destructuring para legenda
+handle, labels1 = box_renda.get_legend_handles_labels()
+box_renda.legend(handle, ['Masculino', 'Feminino'], fontsize = 12)
+
+box_renda
+
+box_renda = sns.boxplot(x = 'Renda', y = 'Sexo', hue = 'Cor', data=dados.query('Renda < 10000'), orient = 'h')
+box_renda.figure.set_size_inches(14, 8)
+box_renda.set_title('Renda por Sexo e Cor', fontsize = 18)
+box_renda.set_xlabel('Reais - R$', fontsize = 14)
+box_renda.set_yticklabels(['Masculino', 'Feminino'])
+
+#destructuring para legenda
+handle, labels1 = box_renda.get_legend_handles_labels()
+box_renda.legend(handle, ['Indígena', 'Branca',  'Preta', 'Amarela', 'Parda'], fontsize = 12)
+
+box_renda
 
 """> ### Conclusões
 
-Escreva suas conclusões aqui...
+- Nota-se pelos Boxplots que a Renda do Sexo Masculino são maiores que as do Sexo Feminino.
+
+- Também é notório que a Renda das pessoas Brancas e Amarelas são bem maiores que a das pessoas Pretas, Pardas e Indígenas, evidenciando problemas sociais.
 
 # <font color="red">DESAFIO<font>
 ### Qual percentual de pessoas de nosso <i>dataset</i> ganham um salário mínimo (R$ 788,00) ou menos?
@@ -402,19 +435,24 @@ Escreva suas conclusões aqui...
 """
 
 from scipy import stats
+stats.percentileofscore(dados['Renda'], 788, kind = 'weak')
 
 """### Qual o valor máximo ganho por 99% das pessoas de nosso <i>dataset</i>?
 #### <font color='red'>Utilize o método <i>quantile()</i> do <i>pandas</i> para realizar estas análises.</font>
 """
 
-
+# 99% ganham abaixo de R$ 15.000,00
+dados['Renda'].quantile(.99)
 
 """### Obtenha a média, mediana, valor máximo e desvio-padrão da variável RENDA segundo ANOS DE ESTUDO e SEXO
 #### <font color='blue'>Destaque os pontos mais importante que você observa nas tabulações</font>
 #### <font color='red'>O parâmento <i>aggfunc</i> da função <i>crosstab()</i> pode receber uma lista de funções. Exemplo: <i>aggfunc = ['mean', 'median', 'max', 'std']</i></font>
 """
 
-
+renda_sexo_anos_estudo = pd.crosstab(dados['Anos de Estudo'], dados['Sexo'], aggfunc = {'mean', 'median', 'max', 'std'}, values = dados['Renda']).round(2)
+renda_sexo_anos_estudo.rename(index = anos_de_estudo, inplace = True)
+renda_sexo_anos_estudo.rename(columns = sexo, inplace = True)
+renda_sexo_anos_estudo
 
 """### Construa um box plot da variável RENDA segundo ANOS DE ESTUDO e SEXO
 #### <font color='blue'>É possível verificar algum comportamento diferenciado no rendimento entre os grupos de pessoas analisados? Avalie o gráfico e destaque os pontos mais importantes.</font>
@@ -424,27 +462,65 @@ from scipy import stats
 #### Mais informações: https://seaborn.pydata.org/generated/seaborn.boxplot.html
 """
 
+box_renda = sns.boxplot(x = 'Renda', y = 'Anos de Estudo', hue = 'Sexo', data=dados.query('Renda < 10000'), orient = 'h')
+box_renda.figure.set_size_inches(16, 10)
+box_renda.set_title('Renda por Anos de Estudo e Sexo', fontsize = 18)
+box_renda.set_xlabel('Reais - R$', fontsize = 14)
+box_renda.set_yticklabels([chave for chave in anos_de_estudo.values()])
 
+# destructuring para legenda
+handle, labels1 = box_renda.get_legend_handles_labels()
+box_renda.legend(handle, ['Masculino', 'Feminino'], fontsize = 12)
+
+box_renda
+
+box_renda = sns.boxplot(x = 'Renda', y = 'Sexo', hue = 'Anos de Estudo', data=dados.query('Renda < 10000'), orient = 'h')
+box_renda.figure.set_size_inches(16, 10)
+box_renda.set_title('Renda por Sexo e Anos de Estudo', fontsize = 18)
+box_renda.set_xlabel('Reais - R$', fontsize = 14)
+box_renda.set_yticklabels(['Masculino', 'Feminino'])
+
+# destructuring para legenda
+handle, labels1 = box_renda.get_legend_handles_labels()
+box_renda.legend(handle, [chave for chave in anos_de_estudo.values()], fontsize = 12)
+
+box_renda
 
 """> ### Conclusões
 
-Escreva suas conclusões aqui...
+- Nota-se a partir do primeiro gráfico 'Renda por Anos de Estudo e Sexo' que, quanto maior a quantidade de Anos de Estudo, maior a Renda da(o) chefe de família.
+
+- Nota-se, ainda, que a Renda do Sexo Masculino é maior que a do Sexo Feminino. Conclui-se que, em média, homens estatisticamente precisam estudar menos para alcançar a mesma faixa de Renda que mulheres.
 
 ### Obtenha a média, mediana, valor máximo e desvio-padrão da variável RENDA segundo as UNIDADES DA FEDERAÇÃO
 #### <font color='blue'>Destaque os pontos mais importante que você observa nas tabulações</font>
 #### <font color='red'>Utilize o método <i>groupby()</i> do <i>pandas</i> juntamente com o método <i>agg()</i> para contruir a tabulação. O método <i>agg()</i> pode receber um dicionário especificando qual coluna do DataFrame deve ser utilizada e qual lista de funções estatísticas queremos obter, por exemplo: <i>dados.groupby(['UF']).agg({'Renda': ['mean', 'median', 'max', 'std']})</i></font>
 """
 
-
+group_uf_mmms = dados.groupby(['UF']).agg({'Renda': ['mean', 'median', 'max', 'std']}).round(2)
+group_uf_mmms.rename(index = uf, inplace = True)
+group_uf_mmms.rename(columns = {'mean': 'Média', 'median': 'Mediana', 'max': 'Renda Máxima', 'std': 'Desvio Padrão'}, inplace = True)
+group_uf_mmms
 
 """### Construa um box plot da variável RENDA segundo as UNIDADES DA FEDERAÇÃO
 #### <font color='blue'>É possível verificar algum comportamento diferenciado no rendimento entre os grupos analisados? Avalie o gráfico e destaque os pontos mais importantes.</font>
 #### <font color='red'>1º - Utilize somente as informações de pessoas com renda abaixo de R$ 10.000</font>
 """
 
-
+box_renda = sns.boxplot(x = 'Renda', y = 'UF', data=dados.query('Renda < 10000'), orient = 'h')
+box_renda.figure.set_size_inches(14, 8)
+box_renda.set_title('Boxplot da Renda por Unidade Federação', fontsize = 18)
+box_renda.set_xlabel('Reais - R$', fontsize = 14)
+box_renda.set_yticklabels([chave for chave in uf.values()])
+# box_renda.set_yticklabels([chave for chave in anos_de_estudo.values()])
 
 """> ### Conclusões
 
-Escreva suas conclusões aqui...
+- Nota-se que o Distrito Federal é a Unidade Federativa que possui consideravelmente a maior Média de Renda;
+- O DF também é a UF com a maior dispersão, tem um elevado Desvio Padrão;
+- O boxplot plot nos aprenseta uma Assimetria à Direita (Moda < Mediana < Media).
+
+- Os estados do Sul e Sudeste possuem maiores Médias de Renda por chefe de família.
+
+- Enquanto as regiões Norte-Nordeste possuem as menores Médias de Renda, com destaque negativo para Maranhão e Piauí, com as menores Médias de toda a região.
 """
