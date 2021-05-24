@@ -189,7 +189,7 @@ percentual
 
 """### 5º Juntar as colunas de frequência e percentuais e ordenar as linhas de acordo com os labels das classes"""
 
-freq_perc_renda = pd.DataFrame({'Frequência': frequencia, 'Percentual': percentual})
+freq_perc_renda = pd.DataFrame({'Frequência': frequencia, 'Percentual': percentual}) 
 freq_perc_renda.sort_index(ascending = False, inplace = True)
 freq_perc_renda
 
@@ -466,7 +466,7 @@ box_renda = sns.boxplot(x = 'Renda', y = 'Anos de Estudo', hue = 'Sexo', data=da
 box_renda.figure.set_size_inches(16, 10)
 box_renda.set_title('Renda por Anos de Estudo e Sexo', fontsize = 18)
 box_renda.set_xlabel('Reais - R$', fontsize = 14)
-box_renda.set_yticklabels([chave for chave in anos_de_estudo.values()])
+box_renda.set_yticklabels([valor for valor in anos_de_estudo.values()])
 
 # destructuring para legenda
 handle, labels1 = box_renda.get_legend_handles_labels()
@@ -482,7 +482,7 @@ box_renda.set_yticklabels(['Masculino', 'Feminino'])
 
 # destructuring para legenda
 handle, labels1 = box_renda.get_legend_handles_labels()
-box_renda.legend(handle, [chave for chave in anos_de_estudo.values()], fontsize = 12)
+box_renda.legend(handle, [valor for valor in anos_de_estudo.values()], fontsize = 12)
 
 box_renda
 
@@ -511,8 +511,9 @@ box_renda = sns.boxplot(x = 'Renda', y = 'UF', data=dados.query('Renda < 10000')
 box_renda.figure.set_size_inches(14, 8)
 box_renda.set_title('Boxplot da Renda por Unidade Federação', fontsize = 18)
 box_renda.set_xlabel('Reais - R$', fontsize = 14)
-box_renda.set_yticklabels([chave for chave in uf.values()])
-# box_renda.set_yticklabels([chave for chave in anos_de_estudo.values()])
+box_renda.set_yticklabels([valor for valor in uf.values()], fontsize = 12)
+
+box_renda
 
 """> ### Conclusões
 
