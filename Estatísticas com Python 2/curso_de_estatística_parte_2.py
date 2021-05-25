@@ -538,19 +538,26 @@ Em um estudo sobre as alturas dos moradores de uma cidade verificou-se que o con
 ### Obter a variável padronizada $Z$
 """
 
+media = 1.7
+media
 
+dp = 0.1
+dp
 
-
-
-
+z = (1.8 - media) / dp
+z
 
 """### Solução 1 - Utilizando tabela"""
 
-
+# z = 1 na tabela padronizada
+probabilidade = 	0.8413
+probabilidade
 
 """### Solução 2 - Utilizando Scipy"""
 
-
+# utilizando norm.cdf e passando 'z' como parâmetro
+from scipy.stats import norm
+norm.cdf(z)
 
 """### Problema B - Identificação da área sob a curva
 
@@ -559,21 +566,40 @@ Em um estudo sobre as alturas dos moradores de uma cidade verificou-se que o con
 ### Obter a variável padronizada $Z$
 """
 
+# calculando a área de 1,7 (50%) até 1,8
+z = (1.7 - media) / dp
+z
 
-
-
+z = (1.8 - media) / dp
+z
 
 """### Solução 1 - Utilizando tabela"""
 
+# entre 1,7m a 1,8m
+probabilidade = 0.8413 - 0.5
+probabilidade
 
-
-
+# área simétricas: '1,6 a 1,7' e '1,7 a 1,8', logo multiplicamos por 2
+probabilidade *= 2
+probabilidade
 
 """### Solução 2 - Utilizando Scipy"""
 
+# calculando a área de 1,8
+z_sup = (1.8 - media) / dp
+round(z_sup, 2)
 
+# calculando a área de 1,6
+z_inf = (1.6 - media) / dp
+round(z_inf, 2)
 
+# 'prob(1,8) - prob(1,6)', onde prob(1,6) = (1 - prob(1.8))
+probabilidade = norm.cdf(z_sup) - (1 - norm.cdf(z_sup))
+probabilidade
 
+# calculando diretamente pelo z_superior e z_inferior
+probabilidade = norm.cdf(z_sup) - norm.cdf(z_inf)
+probabilidade
 
 """### Problema C - Identificação da área sob a curva
 
@@ -582,17 +608,23 @@ Em um estudo sobre as alturas dos moradores de uma cidade verificou-se que o con
 ### Obter a variável padronizada $Z$
 """
 
-
+z = (1.9 - media) / dp
+z
 
 """### Solução 1 - Utilizando tabela"""
 
-
+prob = 1 - 0.9772
+prob
 
 """### Solução 2 - Utilizando Scipy"""
 
+# calculando pelo sxipy
+probabilidade = 1 - norm.cdf(z)
+probabilidade
 
-
-
+# cdf calcula área superio se o z for negativo
+probabilidade = norm.cdf(-z)
+probabilidade
 
 """# <font color=green>3 AMOSTRAGEM</font>
 ***
@@ -645,19 +677,21 @@ Quando a população é finita mas muito numerosa, o custo de um censo pode torn
 É uma das principais maneiras de se extrair uma amostra de uma população. A exigência fundamental deste tipo de abordagem é que cada elemeto da população tenha as mesmas chances de ser selecionado para fazer parte da amostra.
 """
 
+len(dados)
 
+dados.Renda.mean()
 
+# criando uma amostra aleatória simples 'df.sample()'
+amostra = dados.sample(n = 100, random_state = 101)
 
+amostra.shape[0]
 
+# média da amostra criada
+amostra.Renda.mean()
 
+dados['Sexo'].value_counts(normalize = True)
 
-
-
-
-
-
-
-
+amostra['Sexo'].value_counts(normalize = True)
 
 """## <font color=green>3.4 Amostragem Estratificada</font>
 ***
@@ -698,34 +732,45 @@ O desvio padrão das médias amostrais é conhecido como **erro padrão da médi
 ### Entendendo o Teorema do Limite Central
 """
 
+n = 2000
+total_amostras = 1500
 
+amostras = pd.DataFrame()
+amostras
 
+for i in range(total_amostras):
+  _ = dados.Idade.sample(n)
+  _.index = range(0, len(_))
+  amostras['Amostra_' + str(i)] = _
 
+amostras
 
-
-
-
+amostras.mean()
 
 """> O Teorema do Limite Central afirma que, **com o aumento do tamanho da amostra, a distribuição das médias amostrais se aproxima de uma distribuição normal** com média igual à média da população e desvio padrão igual ao desvio padrão da variável original dividido pela raiz quadrada do tamanho da amostra. Este fato é assegurado para n maior ou igual a 30."""
 
-
+# a média das amostras se aproximam de uma distribuição Normal
+amostras.mean().hist(bins = 20)
 
 """> O Teorema do Limite Central afirma que, com o aumento do tamanho da amostra, a distribuição das médias amostrais se aproxima de uma distribuição normal **com média igual à média da população** e desvio padrão igual ao desvio padrão da variável original dividido pela raiz quadrada do tamanho da amostra. Este fato é assegurado para n maior ou igual a 30."""
 
+dados.Idade.mean()
 
-
-
+amostras.mean().mean()
 
 """> O Teorema do Limite Central afirma que, com o aumento do tamanho da amostra, a distribuição das médias amostrais se aproxima de uma distribuição normal com média igual à média da população e **desvio padrão igual ao desvio padrão da variável original dividido pela raiz quadrada do tamanho da amostra**. Este fato é assegurado para n maior ou igual a 30.
 
 # $$\sigma_\bar{x} = \frac{\sigma}{\sqrt{n}}$$
 """
 
+# Desvio Padrão da média das amostras
+amostras.mean().std()
 
+# Descio Padrão da população
+dados.Idade.std()
 
-
-
-
+# pela fórmula
+dados.Idade.std() / np.sqrt(n)
 
 """## <font color=green>4.2 Níveis de confiança e significância</font>
 ***
