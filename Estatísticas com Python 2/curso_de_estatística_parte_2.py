@@ -889,7 +889,7 @@ norm.interval(alpha = 0.95, loc = media_amostral, scale = sigma)
 
 ## <font color='red'>Problema </font>
 
-Estamos estudando o rendimento mensal dos chefes de domicílios com renda até R$\$$ 5.000,00 no Brasil. Nosso supervisor determinou que o **erro máximo em relação a média seja de R$\$$ 10,00**. Sabemos que o **desvio padrão populacional** deste grupo de trabalhadores é de **R$\$$ 1.082,79**. Para um **nível de confiança de 95%**, qual deve ser o tamanho da amostra de nosso estudo?
+Estamos estudando o rendimento mensal dos chefes de domicílios com renda até R$\$$ 5.000,00 no Brasil. Nosso supervisor determinou que o **erro máximo em relação a média seja de R$\$$ 100,00**. Sabemos que o **desvio padrão populacional** deste grupo de trabalhadores é de **R$\$$ 3.323,39**. Para um **nível de confiança de 95%**, qual deve ser o tamanho da amostra de nosso estudo?
 
 ## <font color=green>5.1 Variáveis quantitativas e população infinita</font>
 ***
@@ -925,23 +925,40 @@ $e$ = erro inferencial
 Estamos estudando o rendimento mensal dos chefes de domicílios no Brasil. Nosso supervisor determinou que o **erro máximo em relação a média seja de R$\$$ 100,00**. Sabemos que o **desvio padrão populacional** deste grupo de trabalhadores é de **R$\$$ 3.323,39**. Para um **nível de confiança de 95%**, qual deve ser o tamanho da amostra de nosso estudo?
 """
 
+# metade superior da área do gráfico
+0.95 / 2
 
+# soma-se com a área da metade inferior do gráfico
+(0.95 / 2) + 0.5
 
-
-
-
+z = norm.ppf(0.975)
+z
 
 """### Obtendo $\sigma$"""
 
-
+# desvio padrão populacional dado pelo problema
+sigma = 3323.39
+sigma
 
 """### Obtendo $e$"""
 
-
+# dado pelo problema
+e = 100
+e
 
 """### Obtendo $n$"""
 
+# aplica-se a fórmula para saber o tamanho da amostra
+n = (z * (sigma / e)) ** 2
+int(n.round())
 
+# EXERCÍCIO DO CURSO
+m1 = 45.5
+s1 = 15
+e1 = m1 * 0.1
+z1 = norm.ppf(0.95)
+n = (z1 * (s1 / e1)) ** 2
+int(n.round())
 
 """---
 ---
@@ -980,26 +997,44 @@ Em um lote de **10.000 latas** de refrigerante foi realizada uma amostra aleató
 ### Obtendo $N$
 """
 
-
+N = 10000
+N
 
 """### Obtendo $z$"""
 
-
+# z para 95% de confiança
+z = norm.ppf((0.5 + (0.95 / 2)))
+z
 
 """### Obtendo $s$"""
 
-
+# desvio padrão amostral 12ml
+s = 12
+s
 
 """### Obtendo $e$"""
 
-
+# erro na mesma unidade de medida do s (ml)
+e = 5
+e
 
 """### Obtendo $n$
 
 ## $$n = \frac{z^2 s^2 N}{z^2 s^2 + e^2(N-1)}$$
 """
 
+# tamanho da amostra
+n = ((z ** 2) * (s ** 2) * N) / (((z * s) ** 2) + ((e ** 2)* (N - 1)))
+int(n.round())
 
+"""Exercício do Curso:"""
+
+N2 = 2000                              # lote com 2000 sacos
+s2 = 480                               # 480g o desvio padrão amostral (200 sacos)
+e2 = 300                               # erro máximo de 300g (mesma unidade)
+z2 = norm.ppf((0.5 + (0.95 / 2)))      # nível de confiança de 95%
+n2 = ((z2 ** 2) * (s2 ** 2) * N2) / (((z2 * s2) ** 2) + ((e2 ** 2)* (N2 - 1)))
+n2                                     # tamanho da amostra com esses parâmetros
 
 """# <font color=green>6 FIXANDO O CONTEÚDO</font>
 ***
@@ -1011,21 +1046,47 @@ Estamos estudando o **rendimento mensal dos chefes de domicílios com renda até
 ### Construindo o dataset conforme especificado pelo problema
 """
 
+# query até R$ 5.000
+renda_5000 = dados.query('Renda <= 5000')['Renda']
+renda_5000.head()
 
+# desvio padrão populacional
+sigma = 1082.79
+sigma
 
-
-
-
+# média da minha amostra
+media = renda_5000.mean()
+media
 
 """### Calculando o tamanho da amostra"""
 
-
+# tamanho da amostra n (assumindo que a população é infinita)
+z = norm.ppf(0.5 + (0.95 / 2)) # 95% de confiança
+e = 10                         #  
+n = (z * (sigma / e)) ** 2
+n = int(n.round())
+n
 
 """### Calculando o intervalo de confiança para a média"""
 
-
+# intervalo de confiança para a média (já sabemos, apenas apresentando)
+intervalo = norm.interval(alpha = 0.95, loc = media, scale = (sigma / np.sqrt(n)))  # z*(sigma / sqrt(n)) = 10
+intervalo
 
 """### Realizando uma prova gráfica"""
 
+import matplotlib.pyplot as plt
 
+tamanho_simulacao = 1000
+
+medias = [renda_5000.sample(n = n).mean() for i in range(1, tamanho_simulacao)]
+medias = pd.DataFrame(medias)
+
+ax = medias.plot(style = '.')
+ax.figure.set_size_inches(12, 6)
+
+ax.hlines(y = media, xmin = 0, xmax = tamanho_simulacao, color = 'black', linestyles = 'dashed')
+ax.hlines(y = intervalo[0], xmin = 0, xmax = tamanho_simulacao, color = 'red', linestyles = 'dashed')
+ax.hlines(y = intervalo[1], xmin = 0, xmax = tamanho_simulacao, color = 'red', linestyles = 'dashed')
+ax
 
