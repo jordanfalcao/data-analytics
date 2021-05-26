@@ -810,32 +810,39 @@ Suponha que os pesos dos sacos de arroz de uma indústria alimentícia se distri
 ### Média amostral
 """
 
-
+media_amostral = 5050
+media_amostral
 
 """### Nível de significância ($\alpha$)"""
 
-
+significancia = 0.05
+significancia
 
 """### Nível de confiança ($1 - \alpha$)"""
 
-
+confianca = 1 - significancia
+confianca
 
 """### Obtendo $z$"""
 
-
+tabela_normal_padronizada[17:24]
 
 """### Obtendo $z$
 
 ![alt text](https://caelum-online-public.s3.amazonaws.com/1178-estatistica-parte2/01/img008.png)
 """
 
+0.95 / 2
 
+# somando com a metade da área normal
+0.5 + 0.475
 
+# olhando a tabela
+1.9 + 0.06
 
-
-
-
-
+# norm.ppf retorna o valor de 'z' a partir da área da probabilidade
+z = norm.ppf(0.975)
+z
 
 """### Valores de $z$ para os níveis de confiança mais utilizados
 
@@ -848,25 +855,34 @@ Suponha que os pesos dos sacos de arroz de uma indústria alimentícia se distri
 ### Obtendo $\sigma_\bar{x}$
 """
 
+dp = 150
+dp
 
+n = 20
+n
 
+raiz_n = np.sqrt(n)
+raiz_n
 
-
-
-
-
+sigma = dp / raiz_n
+sigma
 
 """### Obtendo $e$"""
 
-
+# erro
+e = z * sigma
+e
 
 """### Solução 1 - Calculando o intervalo de confiança para a média"""
 
-
+# intervalo = x_médio +/- erro
+intervalo = (media_amostral - e, media_amostral + e)
+intervalo
 
 """### Solução 2 - Calculando o intervalo de confiança para a média"""
 
-
+# pela formula usando norm.interval(%_confianca, x_medio, sigma = (dp / sqrt(n)))
+norm.interval(alpha = 0.95, loc = media_amostral, scale = sigma)
 
 """# <font color=green>5 CÁLCULO DO TAMANHO DA AMOSTRA</font>
 ***
