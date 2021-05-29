@@ -379,66 +379,74 @@ ax
 # 
 # https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html
 
-# In[ ]:
+# In[96]:
 
 
-
+# importando função train_test_split da biblioteca sklearn
+from sklearn.model_selection import train_test_split
 
 
 # ## Criando uma Series (pandas) para armazenar o Consumo de Cerveja (y)
 
-# In[ ]:
+# In[98]:
 
 
-
+# primeiramente separar nossas variáveis dependentes e explicativas
+y = dados['consumo']   # variável dependente
 
 
 # ## Criando um DataFrame (pandas) para armazenar as variáveis explicativas (X)
 
-# In[ ]:
+# In[101]:
 
 
-
+# variáveis explicativas
+X = dados[['temp_max', 'chuva', 'fds']]
 
 
 # ## Criando os datasets de treino e de teste
 
-# In[ ]:
+# In[102]:
 
 
-
+# train_test_split separa o DF em subconjuntos de treino e teste
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=2811) # test 30%
 
 
 # ## Verificando os tamanhos dos arquivos gerados pela função *train_test_split*
 
-# In[ ]:
+# In[103]:
 
 
+# 70%
+X_train.shape
 
 
-
-# In[ ]:
-
+# In[104]:
 
 
+# 30%
+X_test.shape
 
 
-# In[ ]:
+# In[106]:
 
 
+# valor total
+X_train.shape[0] + X_test.shape[0]
 
 
-
-# In[ ]:
-
+# In[107]:
 
 
+# X original
+X.shape[0] * 0.3
 
 
-# In[ ]:
+# In[108]:
 
 
-
+X.shape[0] * 0.7
 
 
 # <img width='600px' src='../Dados/img/reg_01.jpg'>
@@ -449,28 +457,30 @@ ax
 # 
 # https://scikit-learn.org/stable/modules/classes.html#regression-metrics
 
-# In[ ]:
+# In[110]:
 
 
-
+from sklearn.linear_model import LinearRegression
+from sklearn import metrics
 
 
 # ## Instanciando a classe *LinearRegression()*
 
-# In[ ]:
+# In[111]:
 
 
+modelo = LinearRegression()
 
 
-
-# ## Utilizando o método *fit()* do objeto "modelo" para estimar nosso modelo linear utilizando os dados de TREINO (y_train e X_train)
+# ## Utilizando o método *fit()* do objeto "modelo" para estimar nosso modelo linear utilizando os dados de TREINO (X_train e y_train)
 # 
 # https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression.fit
 
-# In[ ]:
+# In[113]:
 
 
-
+# treinando o modelo criado
+modelo.fit(X_train, y_train)
 
 
 # ## Obtendo o coeficiente de determinação (R²) do modelo estimado com os dados de TREINO
@@ -483,30 +493,33 @@ ax
 # 
 # $$R^2(y, \hat{y}) = 1 - \frac {\sum_{i=0}^{n-1}(y_i-\hat{y}_i)^2}{\sum_{i=0}^{n-1}(y_i-\bar{y}_i)^2}$$
 
-# In[ ]:
+# In[114]:
 
 
-
+# modelo.score(X_train, y_train) aprensenta o Coeficiente de Determinação R²
+print('R² = {}'.format(modelo.score(X_train, y_train).round(3))) # quanto mais próximo de 1, melhor
 
 
 # ## Gerando previsões para os dados de TESTE (X_test) utilizando o método *predict()* do objeto "modelo"
 # 
 # https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression.predict
 
-# In[ ]:
+# In[116]:
 
 
-
+# .predict() 
+y_previsto = modelo.predict(X_test)
 
 
 # ## Obtendo o coeficiente de determinação (R²) para as previsões do nosso modelo
 # 
 # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.r2_score.html#sklearn.metrics.r2_score
 
-# In[ ]:
+# In[117]:
 
 
-
+# metrics.r2_score()
+print('R² = %s' % metrics.r2_score(y_test, y_previsto).round(3))
 
 
 # # <font color='red' style='font-size: 30px;'>Obtendo Previsões Pontuais</font>
