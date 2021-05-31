@@ -8,7 +8,7 @@
 
 # ## Importando bibliotecas
 
-# In[1]:
+# In[43]:
 
 
 import pandas as pd
@@ -45,7 +45,7 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 # 
 # Dataset está na pasta "Dados" com o nome "HousePrices_HalfMil.csv" em usa como separador ";".
 
-# In[2]:
+# In[44]:
 
 
 dados = pd.read_csv('HousePrices_HalfMil.csv', sep = ';')
@@ -53,7 +53,7 @@ dados = pd.read_csv('HousePrices_HalfMil.csv', sep = ';')
 
 # ## Visualizar os dados
 
-# In[3]:
+# In[45]:
 
 
 dados.head(10)
@@ -61,7 +61,7 @@ dados.head(10)
 
 # ## Verificando o tamanho do dataset
 
-# In[4]:
+# In[46]:
 
 
 dados.shape
@@ -72,7 +72,7 @@ dados.shape
 
 # ## Estatísticas descritivas
 
-# In[6]:
+# In[47]:
 
 
 dados.describe().round(3)
@@ -89,7 +89,7 @@ dados.describe().round(3)
 #     <li>Existe correlação forte entre as variáveis explicativas?</li>
 # </ul>
 
-# In[8]:
+# In[48]:
 
 
 dados.corr().round(4)
@@ -108,7 +108,7 @@ dados.corr().round(4)
 
 # ## Importando biblioteca seaborn
 
-# In[9]:
+# In[49]:
 
 
 import seaborn as sns
@@ -116,7 +116,7 @@ import seaborn as sns
 
 # ## Configure o estilo e cor dos gráficos (opcional)
 
-# In[27]:
+# In[50]:
 
 
 sns.set_palette('BuPu_r')
@@ -134,7 +134,7 @@ sns.set_style('darkgrid')
 
 # https://seaborn.pydata.org/generated/seaborn.boxplot.html?highlight=boxplot#seaborn.boxplot
 
-# In[28]:
+# In[51]:
 
 
 # boxplot do preço
@@ -160,13 +160,13 @@ ax
 
 # ### Box-plot (Preço X Garagem)
 
-# In[29]:
+# In[52]:
 
 
 # boxplot do preço de acordo coma quantidade de vagas na garagem
 ax = sns.boxplot(y = 'precos', x = 'garagem', data = dados, orient = 'v', width = 0.5)
 ax.figure.set_size_inches(12, 6)
-ax.set_title('Preço dos Imóveis', fontsize = 20)
+ax.set_title('Preço dos Imóveis x Vagas de Garagem', fontsize = 20)
 ax.set_ylabel('Reais - R$', fontsize = 16)
 ax.set_xlabel('Vagas de Garagem', fontsize = 16)
 ax
@@ -174,13 +174,13 @@ ax
 
 # ### Box-plot (Preço X Banheiros)
 
-# In[30]:
+# In[53]:
 
 
 # boxplot do preço de acordo coma quantidade de banheiros
 ax = sns.boxplot(y = 'precos', x = 'banheiros', data = dados, orient = 'v', width = 0.5)
-ax.figure.set_size_inches(12, 6)
-ax.set_title('Preço dos Imóveis', fontsize = 20)
+ax.figure.set_size_inches(14, 6)
+ax.set_title('Preço dos Imóveis x Banheiros', fontsize = 20)
 ax.set_ylabel('Reais - R$', fontsize = 16)
 ax.set_xlabel('Quantidade de Banheiros', fontsize = 16)
 ax
@@ -188,27 +188,51 @@ ax
 
 # ### Box-plot (Preço X Lareira)
 
-# In[ ]:
+# In[54]:
 
 
-
+# boxplot do preço de acordo coma quantidade de lareiras
+ax = sns.boxplot(y = 'precos', x = 'lareira', data = dados, orient = 'v', width = 0.5)
+ax.figure.set_size_inches(14, 6)
+ax.set_title('Preço dos Imóveis x Lareiras', fontsize = 20)
+ax.set_ylabel('Reais - R$', fontsize = 16)
+ax.set_xlabel('Quantidade de Lareiras', fontsize = 16)
+ax
 
 
 # ### Box-plot (Preço X Acabamento em Mármore)
 
-# In[ ]:
+# In[55]:
 
 
-
+# boxplot do preço de acordo com acabamento em mármore
+ax = sns.boxplot(y = 'precos', x = 'marmore', data = dados, orient = 'v', width = 0.5)
+ax.figure.set_size_inches(12, 6)
+ax.set_title('Preço dos Imóveis x Acabamento em Mármore', fontsize = 20)
+ax.set_ylabel('Reais - R$', fontsize = 16)
+ax.set_xlabel('Acabamento em Mármore', fontsize = 16)
+ax
 
 
 # ### Box-plot (Preço X Andares)
 
-# In[ ]:
+# In[56]:
 
 
+# boxplot do preço de acordo coma quantidade de andares
+ax = sns.boxplot(y = 'precos', x = 'andares', data = dados, orient = 'v', width = 0.5)
+ax.figure.set_size_inches(12, 6)
+ax.set_title('Preço dos Imóveis x Andares', fontsize = 20)
+ax.set_ylabel('Reais - R$', fontsize = 16)
+ax.set_xlabel('Quantidade de Andares', fontsize = 16)
+ax
 
 
+# - Nota-se uma tendência de crescimento no valor do imóvel com o aumento da quantidade de banheiros, vagas de garagem e lareiras.
+# 
+# - É notório, também, que os imóveis que tem 1º andar são mais caros que os que são apenas térreo.
+# 
+# - Vê-se, ainda, que os imóveis com acabamento em mármore tem o valor mais elevado que aqueles que não possuem.
 
 # ## Distribuição de frequências da variável *dependente* (y)
 # 
@@ -222,11 +246,17 @@ ax
 
 # https://seaborn.pydata.org/generated/seaborn.distplot.html?highlight=distplot#seaborn.distplot
 
-# In[ ]:
+# In[69]:
 
 
+ax = dados['precos'].hist(bins = 10, legend = True)
+ax.figure.set_size_inches(12, 6)
+ax.set_title('Distribuição de Frequência dos Preços', fontsize = 20)
+ax.set_xlabel('Reais - R$', fontsize = 14)
+ax
 
 
+# - O gráfico da Distribuição de Frequência dos Preços aparenta uma distribuição normal, com preços concentrados na faixa entre 35.000,00 e 55.000,00 reais.
 
 # ## Gráficos de dispersão entre as variáveis do dataset
 
@@ -245,17 +275,25 @@ ax
 #     <li>Compare com os resultados obtidos na matriz de correlação.</li>
 # </ul>
 
-# In[ ]:
+# In[75]:
 
 
+# apenas a variável 'precos'
+ax = sns.pairplot(dados, y_vars = 'precos', x_vars = ['area','garagem', 'banheiros', 'lareira', 'marmore', 'andares'])
+ax.fig.suptitle('Dispersão entre Variáveis', fontsize = 20, y = 1.08)
+ax
 
 
-
-# In[ ]:
-
+# In[76]:
 
 
+# apenas a variável 'precos'
+ax = sns.pairplot(dados, y_vars = 'precos', x_vars = ['area','garagem', 'banheiros', 'lareira', 'marmore', 'andares'], kind = 'reg')
+ax.fig.suptitle('Dispersão entre Variáveis', fontsize = 20, y = 1.08)
+ax
 
+
+# - Pelos gráficos e comparando com nossa matriz correlação, nota-se que a variável dependente (preço) tem uma 'relação positiva' com as variáveis explicativas, ou seja, quanto maior a área e mais vagas de garagem, banheiros, lareiras e andares, maior o Preço. 
 
 # # <font color='red' style='font-size: 30px;'>Estimando um Modelo de Regressão Linear</font>
 # <hr style='border: 2px solid red;'>
@@ -264,34 +302,34 @@ ax
 # 
 # https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html
 
-# In[ ]:
+# In[77]:
 
 
-
+from sklearn.model_selection import train_test_split
 
 
 # ## Criando uma Series (pandas) para armazenar a variável dependente (y)
 
-# In[ ]:
+# In[78]:
 
 
-
+y = dados['precos']
 
 
 # ## Criando um DataFrame (pandas) para armazenar as variáveis explicativas (X)
 
-# In[ ]:
+# In[79]:
 
 
-
+X = dados[['area', 'garagem', 'banheiros', 'lareira', 'marmore', 'andares']]
 
 
 # ## Criando os datasets de treino e de teste
 
-# In[ ]:
+# In[80]:
 
 
-
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state=2811)
 
 
 # ## Importando *LinearRegression* e *metrics* da biblioteca *scikit-learn*
@@ -300,28 +338,29 @@ ax
 # 
 # https://scikit-learn.org/stable/modules/classes.html#regression-metrics
 
-# In[ ]:
+# In[81]:
 
 
-
+from sklearn.linear_model import LinearRegression
+from sklearn import metrics
 
 
 # ## Instanciando a classe *LinearRegression()*
 
-# In[ ]:
+# In[82]:
 
 
-
+modelo = LinearRegression()
 
 
 # ## Utilizando o método *fit()* para estimar o modelo linear utilizando os dados de TREINO (y_train e X_train)
 # 
 # https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression.fit
 
-# In[ ]:
+# In[83]:
 
 
-
+modelo.fit(X_train, y_train)
 
 
 # ## Obtendo o coeficiente de determinação (R²) do modelo estimado com os dados de TREINO
@@ -336,30 +375,30 @@ ax
 #     <li>Qual medida podemos tomar para melhorar essa estatística?</li>
 # </ul>
 
-# In[ ]:
+# In[84]:
 
 
-
+print('R² = {}'.format(modelo.score(X_train, y_train).round(3)))
 
 
 # ## Gerando previsões para os dados de TESTE (X_test) utilizando o método *predict()*
 # 
 # https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression.predict
 
-# In[ ]:
+# In[88]:
 
 
-
+y_previsto = modelo.predict(X_test)
 
 
 # ## Obtendo o coeficiente de determinação (R²) para as previsões do nosso modelo
 # 
 # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.r2_score.html#sklearn.metrics.r2_score
 
-# In[ ]:
+# In[89]:
 
 
-
+print('R² = %s' % metrics.r2_score(y_test, y_previsto).round(3))
 
 
 # # <font color='red' style='font-size: 30px;'>Obtendo Previsões Pontuais</font>
@@ -369,10 +408,19 @@ ax
 # 
 # Crie um simulador que gere estimativas de preço a partir de um conjunto de informações de um imóvel.
 
-# In[ ]:
+# In[90]:
 
 
+area = 85
+garagem = 3
+banheiros = 4
+lareira = 3
+marmore = 1
+andares = 1
 
+entrada=[[area, garagem, banheiros, lareira, marmore, andares]]
+
+print('$ {0:.2f}'.format(modelo.predict(entrada)[0]))
 
 
 # # <font color='red' style='font-size: 30px;'>Métricas de Regressão</font>
@@ -405,10 +453,14 @@ ax
 
 # ## Obtendo métricas para o modelo com Temperatura Máxima
 
-# In[ ]:
+# In[92]:
 
 
+eqm = metrics.mean_squared_error(y_test, y_previsto).round(3)
+reqm = np.sqrt(metrics.mean_squared_error(y_test, y_previsto)).round(2)
+R2 = metrics.r2_score(y_test, y_previsto).round(3)
 
+pd.DataFrame([eqm, reqm, R2], ['EQM', 'REQM', 'R²'], columns = ['Métricas'])
 
 
 # # <font color='red' style='font-size: 30px;'>Salvando e Carregando o Modelo Estimado</font>
@@ -416,18 +468,20 @@ ax
 
 # ## Importando a biblioteca pickle
 
-# In[ ]:
+# In[93]:
 
 
-
+import pickle
 
 
 # ## Salvando o modelo estimado
 
-# In[ ]:
+# In[94]:
 
 
-
+output = open('modelo_preco_imoveis', 'wb') # wb write binary
+pickle.dump(modelo, output)
+output.close()
 
 
 # ### Em um novo notebook/projeto Python
@@ -458,9 +512,3 @@ ax
 # ```
 # $ 46389.80
 # ```
-
-# In[ ]:
-
-
-
-
