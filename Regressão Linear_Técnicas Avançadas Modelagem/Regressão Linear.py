@@ -385,6 +385,13 @@ X_train_constante = sm.add_constant(X_train)
 modelo_statsmodels = sm.OLS(y_train, X_train_constante, hasconst = True).fit()
 
 
+# In[80]:
+
+
+# coeficientes Beta's
+modelo_statsmodels.params
+
+
 # ## Avaliando as estatísticas de teste do novo modelo
 
 # In[45]:
@@ -402,28 +409,29 @@ print(modelo_statsmodels.summary())
 # 
 # https://scikit-learn.org/stable/modules/classes.html#regression-metrics
 
-# In[ ]:
+# In[46]:
 
 
-
+from sklearn.linear_model import LinearRegression
+from sklearn import metrics
 
 
 # ## Instanciando a classe *LinearRegression()*
 
-# In[ ]:
+# In[47]:
 
 
-
+modelo = LinearRegression()
 
 
 # ## Utilizando o método *fit()* do objeto "modelo" para estimar nosso modelo linear utilizando os dados de TREINO (y_train e X_train)
 # 
 # https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression.fit
 
-# In[ ]:
+# In[48]:
 
 
-
+modelo.fit(X_train, y_train)
 
 
 # ## Obtendo o coeficiente de determinação (R²) do modelo estimado com os dados de TREINO
@@ -436,30 +444,30 @@ print(modelo_statsmodels.summary())
 # 
 # $$R^2(y, \hat{y}) = 1 - \frac {\sum_{i=0}^{n-1}(y_i-\hat{y}_i)^2}{\sum_{i=0}^{n-1}(y_i-\bar{y}_i)^2}$$
 
-# In[ ]:
+# In[50]:
 
 
-
+print('R² = {}'.format(modelo.score(X_train, y_train).round(3)))
 
 
 # ## Gerando previsões para os dados de TESTE (X_test) utilizando o método *predict()* do objeto "modelo"
 # 
 # https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html#sklearn.linear_model.LinearRegression.predict
 
-# In[ ]:
+# In[51]:
 
 
-
+y_previsto = modelo.predict(X_test)
 
 
 # ## Obtendo o coeficiente de determinação (R²) para as previsões do nosso modelo
 # 
 # https://scikit-learn.org/stable/modules/generated/sklearn.metrics.r2_score.html#sklearn.metrics.r2_score
 
-# In[ ]:
+# In[52]:
 
 
-
+print('R² = {}'.format(metrics.r2_score(y_test, y_previsto).round(3)))
 
 
 # # <font color='red' style='font-size: 30px;'>5.2 Obtendo Previsões Pontuais</font>
@@ -467,36 +475,43 @@ print(modelo_statsmodels.summary())
 
 # ## Dados de entrada
 
-# In[ ]:
+# In[65]:
 
 
-
+entrada = X_test[0:1]
+entrada
 
 
 # ## Gerando previsão pontual
 
-# In[ ]:
+# In[66]:
 
 
-
+# valor na transformação logarítmica
+modelo.predict(entrada)[0]
 
 
 # ## Invertendo a transformação para obter a estimativa em R$
 # 
 # https://docs.scipy.org/doc/numpy-1.15.0/reference/generated/numpy.exp.html
 
-# In[ ]:
+# In[67]:
 
 
-
+# retornando da transformação, valor em Reais
+print('R$ {0:.2f}'.format(np.exp(modelo.predict(entrada)[0])))
 
 
 # ## Criando um simulador simples
 
-# In[ ]:
+# In[69]:
 
 
+Area = 150
+Dist_Praia = 1
+entrada = [[np.log(Area), np.log(Dist_Praia + 1)]]
 
+print('R$ {0:.2f}'.format(np.exp(modelo.predict(entrada)[0])))
 
 
 # # <font color='red' style='font-size: 30px;'>5.3 Interpretação dos Coeficientes Estimados</font>
@@ -506,16 +521,18 @@ print(modelo_statsmodels.summary())
 # 
 # <p style='font-size: 20px; line-height: 2; margin: 10px 50px; text-align: justify;'>O <b>intercepto</b> representa o efeito médio em $Y$ (Preço do Imóveis) tendo todas as variáveis explicativas excluídas do modelo. No caso do modelo log-linear este coeficiente deve ser transformado com o uso da função exponencial para ser apresentado em R$.</p>
 
-# In[ ]:
+# In[70]:
 
 
+# como visto no summary
+modelo.intercept_
 
 
-
-# In[ ]:
-
+# In[71]:
 
 
+# transformação para R$
+np.exp(modelo.intercept_)
 
 
 # ## Obtendo os coeficientes de regressão
@@ -524,36 +541,37 @@ print(modelo_statsmodels.summary())
 # 
 # <p style='font-size: 20px; line-height: 2; margin: 10px 50px; text-align: justify;'>Um aspecto interessante do modelo log-linear, que o tornou muito utilizado nos trabalhos aplicados, é que os coeficientes angulares $\beta_2$ e $\beta_3$ medem as elasticidades de Y em relação a $X_2$ e $X_3$, isto é, a variação percentual de Y correspondente a uma dada variação percentual (pequena) em $X_2$ e $X_3$.</p>
 
-# In[ ]:
+# In[72]:
 
 
-
+# valores percentuais (elasticidade)
+modelo.coef_
 
 
 # ## Confirmando a ordem das variáveis explicativas no DataFrame
 
-# In[ ]:
+# In[73]:
 
 
-
+X.columns
 
 
 # ## Criando uma lista com os nomes das variáveis do modelo
 
-# In[ ]:
+# In[76]:
 
 
-
+index = ['Intercepto', 'log Área', 'log Distância até a Praia']
 
 
 # ## Criando um DataFrame para armazenar os coeficientes do modelo
 # 
 # https://docs.scipy.org/doc/numpy/reference/generated/numpy.append.html?#numpy.append
 
-# In[ ]:
+# In[77]:
 
 
-
+pd.DataFrame(data = np.append(modelo.intercept_, modelo.coef_), index = index, columns = ['Parâmetros'])
 
 
 # ## Interpretação dos Coeficientes Estimados
@@ -575,20 +593,20 @@ print(modelo_statsmodels.summary())
 
 # ## Gerando as previsões do modelo para os dados de TREINO
 
-# In[ ]:
+# In[81]:
 
 
-
+y_previsto_train = modelo.predict(X_train)
 
 
 # ## Gráfico de dispersão entre valor estimado e valor real
 # 
 # https://seaborn.pydata.org/generated/seaborn.scatterplot.html
 
-# In[ ]:
+# In[82]:
 
 
-
+ax = sns.scatterplot(x = y_previsto_train, y = y_train)
 ax.figure.set_size_inches(12, 6)
 ax.set_title('Previsão X Real', fontsize=18)
 ax.set_xlabel('log do Preço - Previsão', fontsize=14)
@@ -598,26 +616,21 @@ ax
 
 # ## Obtendo os resíduos
 
-# In[ ]:
+# In[83]:
 
 
-
+# valor real - valor previsto
+residuo = y_train - y_previsto_train
 
 
 # ## Plotando a distribuição de frequências dos resíduos
 
-# In[ ]:
+# In[85]:
 
 
-
+ax = sns.distplot(residuo)
 ax.figure.set_size_inches(12, 6)
 ax.set_title('Distribuição de Frequências dos Resíduos', fontsize=18)
 ax.set_xlabel('log do Preço', fontsize=14)
 ax
-
-
-# In[ ]:
-
-
-
 
