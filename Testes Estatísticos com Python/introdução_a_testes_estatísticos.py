@@ -172,3 +172,54 @@ ax.set(xlabel = 'Tempo de duração - minutos', ylabel = 'Densidade')
 ax.set_title('Duração de filmes do TMDB 5000')
 ax
 
+# distribuição cumulativa
+ax = sns.distplot(tmdb.query('runtime > 0').runtime.dropna(),
+                  hist_kws = {'cumulative': True},    # parâmetros extras do matplotlib
+                  kde_kws = {'cumulative': True})
+ax.set(xlabel = 'Tempo de duração - minutos', ylabel = 'Densidade')
+ax.set_title('Duração de filmes do TMDB 5000')
+ax
+
+# 80% quantile
+print('80% dos filmes tem menos de {} minutos de duração.'.format(tmdb.query('runtime > 0').runtime.dropna().quantile(q = 0.8)))
+
+"""# Movielens: média dos filmes com pelo menos 10 votos."""
+
+print('Média das das notas dos filmes com pelo menos 10 votos:', nota_media_dos_filmes_com_pelo_menos_10_votos.mean())
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+# adicionar as médias cumulativas, quantos maior a amostra, mais estável
+medias = list()
+
+for i in range(1, len(nota_media_dos_filmes_com_pelo_menos_10_votos)):
+  medias.append(nota_media_dos_filmes_com_pelo_menos_10_votos[0:i].mean())
+
+plt.plot(medias)
+
+# modificando a ordem (não sabemos se os dados estão numa ordem específica)
+medias = list()
+
+np.random.seed(75243)
+temp = nota_media_dos_filmes_com_pelo_menos_10_votos.sample(frac=1)
+
+medias = [temp[0:i].mean() for i in range(1, len(temp))]
+
+plt.plot(medias)
+
+"""Intervalo de confiança com teste Z"""
+
+from statsmodels.stats.weightstats import zconfint
+
+# teste z para intervalo com 95% de confiança (usado em amostras grandes: > 30)
+zconfint(nota_media_dos_filmes_com_pelo_menos_10_votos)
+
+from statsmodels.stats.weightstats import DescrStatsW
+
+# cria um objeto do tipo statsmodel, usado no teste T (usado em amostras pequenas: <30)
+descr_todos_com_10_votos = DescrStatsW(nota_media_dos_filmes_com_pelo_menos_10_votos)
+
+# teste de intervalo de confiança para 95% de confiança 
+descr_todos_com_10_votos.tconfint_mean()
+
