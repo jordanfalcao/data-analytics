@@ -220,6 +220,155 @@ from statsmodels.stats.weightstats import DescrStatsW
 # cria um objeto do tipo statsmodel, usado no teste T (usado em amostras pequenas: <30)
 descr_todos_com_10_votos = DescrStatsW(nota_media_dos_filmes_com_pelo_menos_10_votos)
 
-# teste de intervalo de confiança para 95% de confiança 
+# teste T de intervalo de confiança para 95% de confiança 
 descr_todos_com_10_votos.tconfint_mean()
+
+"""# Analisando o Filme 1:"""
+
+filmes = pd.read_csv('movies.csv')
+filmes.query('movieId == 1')
+
+notas1 = notas.query('movieId == 1')
+notas1.head()
+
+# histograma do Filme 1 (Toy Story)
+ax = sns.distplot(notas1.rating)
+ax.set(xlabel = 'Nota', ylabel = 'Densidade')
+ax.set_title('Distribuição das notas do Filme 1 - Toy Story')
+ax
+
+# boxplot do filme 1 - toy story
+ax = sns.boxplot(notas1.rating)
+ax.set(xlabel='Nota')
+ax.set_title('Distribuição das notas do filme 1 - Toy Story')
+
+# confirmamos a mediana = 4
+notas1.describe()
+
+# intervalo com 95% de confiança para o teste Z (215 amostras)
+zconfint(notas1.rating)
+
+from statsmodels.stats.weightstats import ztest
+
+# novo teste, informando que acreditamos que a nota do ToyStory seja igual à nota média dos filmes
+ztest(notas1.rating, value = nota_media_dos_filmes_com_pelo_menos_10_votos.mean())
+
+"""ztest retorna uma tupla com 'teste estatísticos e o p-value'
+
+Como o p-value é muito pequeno, 8,97 x 10^(-18), menor que 0,05, descartamos
+a hipótese que a média do Filme 1 (3,92) é igual a média dos filmes (3,43).
+"""
+
+# comportamento da médida do Filme 1 ao aumentarmos a amostra
+np.random.seed(75241)
+temp = notas1.sample(frac=1).rating
+
+medias = [temp[0:i].mean() for i in range(1, len(temp))]
+plt.plot(medias)
+
+# média e p-value do z-test a medida que aumentamos a amostra
+np.random.seed(75241)
+temp = notas1.sample(frac=1).rating
+
+def calcula_teste(i):
+  media = temp[0:i].mean()
+  stat, p = ztest(temp[0:i], value = nota_media_dos_filmes_com_pelo_menos_10_votos.mean())
+  return (i, media, p)
+
+valores = np.array([calcula_teste(i) for i in range(2, len(temp))]) # a partir do 2, não tem como fazer o teste com apenas 1 valor
+
+plt.plot(valores[:, 0] ,valores[:, 1])  #(qntd amostras, média)
+plt.plot(valores[:, 0] ,valores[:, 2])  #(qntd amostras, p-value)
+plt.hlines(y = 0.05, xmin = -5, xmax = len(temp) + 5, linestyles='--', color = 'g')
+
+"""Nota-se que inicialmente a média é alta e cai para aproximadamente o valor da média das notas. Consequentemente, o p-value se aproxima de 1, pois a amostra é pequena. Entre uma amostra de tamanho 30 e 40, o p-value começa a estabilizar.
+
+## Comparação de dois conjuntos de amostras
+"""
+
+# intervalor de confiança entre duas amostras, antes era uma amostra com uma média
+print(ztest(notas1.rating, notas.rating))
+print(ztest(notas1.rating, nota_media_dos_filmes_com_pelo_menos_10_votos))
+zconfint(notas1.rating, notas.rating)
+
+# intervalo de confiança entre duas notas:
+print('A média de Toy Story está entre {} e {} mais alta que a média dos filmes.'.format(zconfint(notas1.rating, notas.rating)[0], zconfint(notas1.rating, notas.rating)[1]))
+
+from scipy.stats import ttest_ind
+
+# t-test entre duas amostras usando ttest_ind da scipy.stats
+ttest_ind(notas1.rating, notas.rating)
+
+# intervalo de confiança pelo statsmodel - t-test
+descr_todas_notas = DescrStatsW(notas.rating)
+descr_toy_story = DescrStatsW(notas1.rating)
+comparacao = descr_todas_notas.get_compare(descr_toy_story)   # comparando as médias
+print(comparacao.summary())
+print(comparacao.summary(use_t = False))
+
+"""## Boxplot"""
+
+import matplotlib.pyplot as plt
+
+# comparando os boxplot de todos os filmes com Toy Story
+fig = plt.figure(figsize = (5, 4))
+eixo = fig.add_axes([0, 0, 1, 1])
+
+eixo.boxplot([notas.rating, notas1.rating])
+eixo.set_title('Comparação entre Toy Story e demais filmes', fontsize = 15, pad = 10)
+eixo.set_xticklabels(['Todas as notas', 'Toy Story'], fontsize = 12)
+eixo.set_ylabel('Notas')
+eixo.axhline(notas1.rating.median(), color = 'g', linestyle = '--')
+eixo.axhline(notas.rating.median(), color = 'b', linestyle = '--')
+
+# comparando as notas com amostras pequenas
+fig = plt.figure(figsize = (5, 4))
+eixo = fig.add_axes([0, 0, 1, 1])
+
+eixo.boxplot([notas.rating, notas1[3:12].rating])
+eixo.set_title('Comparação entre Toy Story e demais filmes', fontsize = 15, pad = 10)
+eixo.set_xticklabels(['Todas as notas', 'Toy Story (3 ao 12)'], fontsize = 12)
+eixo.set_ylabel('Notas')
+# eixo.axhline(notas1.rating.median(), color = 'g', linestyle = '--')
+# eixo.axhline(notas.rating.median(), color = 'b', linestyle = '--')
+
+# test t para uma amostra pequena
+descr_todas_notas = DescrStatsW(notas.rating)
+descr_toy_story = DescrStatsW(notas1[3:12].rating)
+comparacao = descr_todas_notas.get_compare(descr_toy_story)   # comparando as médias
+print(comparacao.summary())
+
+"""# Comparar a média de dois filmes"""
+
+filmes.query('movieId in [1, 593, 72226]')
+
+# comparando as notas com amostras pequenas
+notas1 = notas.query('movieId == 1')
+notas593 = notas.query('movieId == 593')
+notas72226 = notas.query('movieId == 72226')
+
+fig = plt.figure(figsize = (6, 4))
+eixo = fig.add_axes([0, 0, 1, 1])
+
+eixo.boxplot([notas1.rating, notas593.rating, notas72226.rating])
+eixo.set_title('Distribuição das notas de acordo com os filmes', fontsize = 15, pad = 10)
+eixo.set_xticklabels(['Toy Story', 'The Silence of the Lambs', 'Fantastic Mr. Fox'], fontsize = 12)
+eixo.set_ylabel('Notas')
+
+# boxplot pela seaborn
+fig = plt.figure(figsize = (10, 5))
+ax = fig.add_axes([0, 0, 1, 1])
+
+ax = sns.boxplot(x = 'movieId', y = 'rating', data = notas.query('movieId in (1, 593, 72226)'))
+ax.set_xlabel('Filme', fontsize = 15)
+ax.set_ylabel('Notas', fontsize = 15)
+ax.set_title('Distribuição das notas de acordo com os filmes', fontsize = 18)
+ax.set_xticklabels(['Toy Story', 'The Silence of the Lambs', 'Fantastic Mr. Fox'], fontsize = 12)
+ax
+
+# test t para uma amostra pequena
+descr_1 = DescrStatsW(notas1.rating)
+descr_593 = DescrStatsW(notas593.rating)
+comparacao = descr_1.get_compare(descr_593)   # comparando as médias
+print(comparacao.summary())
 
