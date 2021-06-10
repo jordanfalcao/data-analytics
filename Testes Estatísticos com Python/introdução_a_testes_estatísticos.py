@@ -366,9 +366,54 @@ ax.set_title('Distribuição das notas de acordo com os filmes', fontsize = 18)
 ax.set_xticklabels(['Toy Story', 'The Silence of the Lambs', 'Fantastic Mr. Fox'], fontsize = 12)
 ax
 
-# test t para uma amostra pequena
+# test t: comparação entre filme 1 e filme 593
 descr_1 = DescrStatsW(notas1.rating)
 descr_593 = DescrStatsW(notas593.rating)
 comparacao = descr_1.get_compare(descr_593)   # comparando as médias
 print(comparacao.summary())
 
+# test t: comparação entre filme 72226 e filme 593
+descr_72226 = DescrStatsW(notas72226.rating)
+descr_593 = DescrStatsW(notas593.rating)
+comparacao = descr_72226.get_compare(descr_593)   # comparando as médias
+print(comparacao.summary())
+
+"""O intervalo inclui tanto a chance do filme ser pior como melhor.
+P>|t| muito alto, ou seja, não há diferença significativa.
+"""
+
+comparacao = descr_1.get_compare(descr_72226)   # comparando as médias
+print(comparacao.summary())
+
+"""Há diferenças significativas apenas entre filme 1 - Toy Story - e o filme 593 - The Silence of the Lambs. Realizando as demais comparações, não podemos dizer qual filme é melhor ou pior."""
+
+# Contabilizando os 3 filmes
+notas.query('movieId in (1, 593, 72226)').groupby('movieId').count()
+
+"""Filme 72226 - Fantastic Mr. Fox - possui amostra pequena, o certo é realizar o T-test."""
+
+from scipy.stats import normaltest
+
+# teste de normalidade da distribuição
+stat, p = normaltest(notas1.rating)
+
+print(stat, p)
+
+"""Como o p-value é bem menor que 0,05, descartamos a hipótese nula, logo nossos dados não possuem uma distribuição normal.
+
+Os teste T e Z necessitam de uma distribuição normal para serem aplicados.
+
+Assim, aplicaremos um teste não paramétrico para distribuição desconhecida:
+"""
+
+from scipy.stats import ranksums
+
+# teste ranksums entre Toy Story e The Silence of the Lambs
+stat, p = ranksums(notas1.rating, notas593.rating)
+print(stat, p)
+
+"""A hipótese nula do teste 'ranksums' é que as duas amostras são extraídos da mesma distribuição.
+A hipótese alternativa é que os VALORES (e não a média, como seria numa distribuição NORMAL) de uma distribuição são maiores que os VALORES da outra.
+
+Neste caso acima, descartamos a hipótese nula, logo concluímos que provavelmente uma nota aleatória - e não a média, como seria numa distribuição NORMAL - de The Silence of the Lambs seria maior que uma nota aleatória de Toy Story.
+"""
