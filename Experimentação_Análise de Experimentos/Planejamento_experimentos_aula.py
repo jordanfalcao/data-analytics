@@ -341,6 +341,8 @@ modelo_ajustado = modelo.fit()
 print(modelo_ajustado.summary())
 
 
+# A hipótese nula para a relação 'Farinha x Chocolate' tem uma alta probabilidade de acontecer - 15,6% - ou seja, essa variável não tem significância no nosso modelo.
+
 # <p style='margin: 200px 200px;'>    
 # 
 # 
@@ -398,6 +400,9 @@ print(modelo_ajustado.summary())
 # 
 # 
 
+# ## Ou seja, se o t-calculado for menor (em módulo) que o t-tabelado, aceitaremos a Hipótese Nula e assumimos que o parâmetro não é estatisticamente significante.
+# ## Em contrapartida, se o t-calculado for maior (em módulo) que o t-tabelado, então o parâmetro é estatisticamente significante.
+
 # <p style='margin: 150px 150px;'>     
 # <img width='1000px' src='figuras/Figura_20.png'
 # 
@@ -406,71 +411,82 @@ print(modelo_ajustado.summary())
 # <hr>
 # <p style='margin: 150px 150px;'>    
 
-# In[ ]:
+# In[50]:
 
 
+# .tvalues retorna os t-calculados
+t_valores = modelo_ajustado.tvalues
 
 
-
-# In[ ]:
-
+# In[51]:
 
 
+# t-calculado
+t_valores
 
 
-# In[ ]:
+# In[52]:
 
 
+nome = t_valores.index.tolist()
 
 
-
-# In[ ]:
-
+# In[53]:
 
 
+nome
 
 
 # ### .
 
-# In[ ]:
+# In[58]:
 
 
-
+from scipy import stats
 
 
 # ### .
 # 
 
-# In[ ]:
+# In[59]:
 
 
+# contruindo uma distribuição t com 4 graus de liberdade dos resíduos
+distribuicao = stats.t(df = 4)
 
 
-
-# In[ ]:
-
+# In[63]:
 
 
+# t-tabelado 
+t_tabelado = distribuicao.ppf(q = 1 - 0.025) # 0,9775 - equivalente ao ponto t no gráfico para 95% de confiança
+print('O valor do t-tabelado é {:.4f}.'.format(t_tabelado))
 
 
-# In[ ]:
+# In[64]:
 
 
+# criando uma lista com o t_tabelado 4 vezes
+limite = [t_tabelado] * 4
 
 
-
-# In[ ]:
-
+# In[65]:
 
 
+limite
 
 
 # ### Plotando o gráfico 
 
-# In[ ]:
+# In[66]:
 
 
-
+# t-calculado (barras) e o t-tabelado (linha vermelha)
+pareto = sns.barplot(x = t_valores, y = nome)
+pareto.figure.set_size_inches(15, 6)
+pareto.tick_params(labelsize = 20)
+pareto.set_xlabel('t-valores', fontsize = 20)
+pareto.plot(limite, nome, 'r')
 
 
 # # <font color = 'purple'> Propondo um novo modelo   </font>
@@ -505,22 +521,22 @@ print(modelo_ajustado.summary())
 # <hr>    
 # 
 
-# In[ ]:
+# In[67]:
 
 
+modelo_2 = smf.ols(data = experimento, formula = 'Porcoes ~ Farinha + Chocolate')
 
 
-
-# In[ ]:
-
+# In[68]:
 
 
+modelo_ajustado_2 = modelo_2.fit()
 
 
-# In[ ]:
+# In[70]:
 
 
-
+print(modelo_ajustado_2.summary())
 
 
 # <hr>
@@ -533,108 +549,128 @@ print(modelo_ajustado.summary())
 # <hr style = 'border: 1px solid purple;'>
 # 
 
-# In[ ]:
+# In[71]:
 
 
+t_valores = modelo_ajustado_2.tvalues
 
 
-
-# In[ ]:
-
+# In[72]:
 
 
+t_valores
 
 
-# In[ ]:
+# In[73]:
 
 
+nomes = t_valores.index.tolist()
 
 
-
-# In[ ]:
-
+# In[74]:
 
 
+nomes
 
 
 # ### .
 
-# In[ ]:
+# In[83]:
 
 
+# criando uma distribuição t
+distribuicao = stats.t(df = 5) # agora temos 5 graus de liberdade
 
 
-
-# In[ ]:
-
+# In[85]:
 
 
+# t-tabelado para grau de liberdade dos resíduos igual a 5
+t_tabelado = distribuicao.ppf(q = 1 - 0.025)
+print('O t tabelado para 5 graus de liberdade do resíduo é {:.4f}.'.format(t_tabelado))
 
 
-# In[ ]:
+# In[87]:
 
 
-
+# criando uma lista com 4 x o t-tabelado
+limite = [t_tabelado] * len(nomes)
+limite
 
 
 # ### Plotando o gráfico
 
-# In[ ]:
+# In[88]:
 
 
-
+pareto = sns.barplot(x = t_valores, y = nomes)
+pareto.figure.set_size_inches(15,6)
+pareto.tick_params(labelsize = 20)
+pareto.set_xlabel('t-valores', fontsize = 20)
+pareto.plot(limite, nomes, 'r')
 
 
 # <font color='red' style='font-size: 30px;'> Preditos por observados  </font>
 # <hr style='border: 2px solid red;'>
 
-# In[ ]:
+# In[90]:
 
 
+observados = experimento['Porcoes']
 
 
-
-# In[ ]:
-
+# In[91]:
 
 
-
-
-# ### .
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
+observados
 
 
 # ### .
 
-# In[ ]:
+# In[92]:
 
 
+preditos = modelo_ajustado_2.predict()
 
 
-
-# In[ ]:
-
+# In[93]:
 
 
+# valores preditos pelo modelo
+preditos
 
+
+# ### .
+
+# In[94]:
+
+
+import matplotlib.pyplot as plt
+
+
+# In[99]:
+
+
+plt.figure(figsize = (10, 5))
+plt.xlabel('Preditos', fontsize = 16)
+plt.ylabel('Observados', fontsize = 16)
+
+# linha de guia (valores observados = valores preditos), representa a situação ideal
+x = np.linspace(start = 15, stop = 50, num = 10)
+y = np.linspace(start = 15, stop = 50, num = 10)
+
+plt.plot(x, y, 'r')
+
+# comparação entre os valores preditos e observados
+plt.scatter(preditos, observados)
 
 
 # <hr>
 
-# In[ ]:
+# In[100]:
 
 
-
+print(modelo_ajustado_2.summary())
 
 
 # ### .
@@ -646,32 +682,44 @@ print(modelo_ajustado.summary())
 #     
 # <hr style = 'border: 1px solid purple;'>
 
-# In[ ]:
+# In[101]:
 
 
+parametros = modelo_ajustado_2.params
 
 
-
-# In[ ]:
-
+# In[102]:
 
 
+parametros
 
 
 # ### .
 
 # ### Definindo a função
 
-# In[ ]:
+# In[105]:
 
 
+def modelo_receita(x_f, x_c):
+    #limite
+    limite_normalizado = [-1, 1]
+    limite_farinha = [0.5, 1.5]
+    limite_chocolate = [0.1, 0.5]
+    
+    #converter por interpolação
+    x_f_convertido = np.interp(x_f, limite_farinha, limite_normalizado)
+    x_c_convertido = np.interp(x_c, limite_chocolate, limite_normalizado)
+    
+    porcoes = parametros['Intercept'] + parametros['Farinha'] * x_f_convertido + parametros['Chocolate'] * x_c_convertido
+    return round(porcoes)
 
 
-
-# In[ ]:
-
+# In[107]:
 
 
+# prevendo quantidade de cupcakes a partir dos valores de Farinha e Chocolate passados
+modelo_receita(0.6, 0.1)
 
 
 # 
