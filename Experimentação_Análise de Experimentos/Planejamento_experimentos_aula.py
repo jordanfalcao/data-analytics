@@ -774,48 +774,68 @@ modelo_receita(0.6, 0.1)
 # 
 # <p style='margin: 30px 30px;'>
 
-# In[ ]:
+# ## Construindo um mapa de cores para o nosso experimento.
+
+# In[108]:
 
 
-
-
-
-# In[ ]:
-
-
-
+x_farinha = np.linspace(start = 0.5, stop = 1.5, num = 10)
+x_farinha
 
 
 # ### . 
 
-# In[ ]:
+# In[109]:
 
 
+x_chocolate = np.linspace(start = 0.1, stop = 0.5, num = 10)
+x_chocolate
 
 
-
-# In[ ]:
-
+# In[110]:
 
 
+# percorrendo todos os pontos definidos nas listas acima
+pontos = []
+
+for cont1 in x_farinha:
+    temp = []
+    for cont2 in x_chocolate:
+        temp.append(modelo_receita(cont1, cont2))
+    pontos.append(temp)
+    
+pontos
 
 
 # ### .
 
 # ### Construindo a superfície de resposta
 
-# In[ ]:
+# In[111]:
 
 
-
+import matplotlib.cm as cm
 
 
 # https://matplotlib.org/users/colormaps.html
 
-# In[ ]:
+# In[121]:
 
 
+# base
+plt.figure(figsize = (16, 6))
+plt.xlabel('Farinha (kg)', fontsize = 16)
+plt.ylabel('Chocolate (kg)', fontsize = 16)
 
+# mapa de cores
+mapa_cor = plt.imshow(pontos, origin = 'lower', cmap = cm.rainbow, interpolation = 'quadric', extent = (0.5, 1.5, 0.1, 0.5))
+
+# barra de cor
+plt.colorbar().set_label('Porcoes', fontsize = 16)
+
+# linhas de guia 
+linhas = plt.contour(x_farinha, x_chocolate, pontos, colors = 'k', linewidths = 1.2)
+plt.clabel(linhas, inline = True, fmt = '%1.0f', fontsize = 15, inline_spacing = 10)
 
 
 # In[ ]:
