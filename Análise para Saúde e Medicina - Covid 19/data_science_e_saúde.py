@@ -138,14 +138,110 @@ plt.ylabel('Casos confirmados', fontsize = 14)
 plt.title('Total de casos confirmados no Brasil', fontsize = 18)
 plt.show()
 
-# mortos e recuperados no
+# mortos e recuperados no mundo
 deaths = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv")
 recovered = pd.read_csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv")
 
+# casos de morte e recuperados no mundo
 deaths_by_country = deaths.groupby('Country/Region').sum()
 recovered_by_country = recovered.groupby('Country/Region').sum()
 
-recovered.head()
+display(recovered.head())
+display(deaths.head())
 
-deaths_by_country.loc['Brazil'][2:].plot()
+# função que retorna a última data agrupada por país
+def latest_by_country(data):
+  return data.groupby('Country/Region').sum().iloc[:,-1]
+
+display(latest_by_country(confirmed))
+display(latest_by_country(deaths))
+display(latest_by_country(recovered))
+
+# chamando a função e colocando num DataFrame
+informations = [latest_by_country(confirmed), latest_by_country(deaths), latest_by_country(recovered)]
+combined = pd.concat(informations, axis = 1)
+combined.columns = ['confirmed', 'deaths', 'recovered']
+combined
+
+"""## Taxa de letalidade:"""
+
+# taxa de letalidade expressa em porcentagem %
+# muito difícil falar em letalidade de uma doença durante uma pandemia
+sum_up = combined.sum()
+letality_rate_1 = sum_up['deaths'] / sum_up['confirmed']
+letality_rate_2 = sum_up['deaths'] / (sum_up['deaths'] + sum_up['recovered'])
+print('A primeira estimativa (otimista) da taxa de letalidade é: {:.3f}%'.format(letality_rate_1 * 100))
+print('A segunda estimativa (pessimista) da taxa de letalidade é: {:.3f}%'.format(letality_rate_2 * 100))
+
+# função que retorna uma data específica agrupada por país
+def latest_by_country_at(data, date):
+  return data.groupby('Country/Region').sum()[date]
+
+# chamando a função e colocando num DataFrame
+informations = [latest_by_country_at(confirmed, '2/20/20'), latest_by_country_at(deaths, '2/20/20'), latest_by_country_at(recovered, '2/20/20')]
+combined_2_20_20 = pd.concat(informations, axis = 1)
+combined_2_20_20.columns = ['confirmed', 'deaths', 'recovered']
+
+
+# taxa de letalidade expressa em porcentagem %
+# muito difícil falar em letalidade de uma doença durante uma pandemia
+sum_up = combined_2_20_20.sum()
+letality_rate_1 = sum_up['deaths'] / sum_up['confirmed']
+letality_rate_2 = sum_up['deaths'] / (sum_up['deaths'] + sum_up['recovered'])
+print('A primeira estimativa (otimista) da taxa de letalidade é: {:.3f}%'.format(letality_rate_1 * 100))
+print('A segunda estimativa (pessimista) da taxa de letalidade é: {:.3f}%'.format(letality_rate_2 * 100))
+
+# usando uma data anterior de confirmados como referência
+def latest_by_country_at(data, date):
+  return data.groupby('Country/Region').sum()[date]
+
+# chamando a função e colocando num DataFrame: DATA ANTERIOR
+informations = [latest_by_country_at(confirmed, '2/8/20'), latest_by_country_at(deaths, '2/20/20'), latest_by_country_at(recovered, '2/20/20')]
+combined_12 = pd.concat(informations, axis = 1)
+combined_12.columns = ['confirmed', 'deaths', 'recovered']
+
+
+# taxa de letalidade expressa em porcentagem %
+# muito difícil falar em letalidade de uma doença durante uma pandemia
+sum_up = combined_12.loc['China']
+letality_rate_3 = sum_up['deaths'] / sum_up['confirmed']
+print('A primeira estimativa (otimista) da taxa de letalidade é: {:.3f}%'.format(letality_rate_3 * 100))
+display(sum_up)
+
+# letalidade por país
+letality_rate_1 = combined['deaths'] / combined['confirmed']
+letality_rate_2 = combined['deaths'] / (combined['deaths'] + combined['recovered'])
+combined['letality_rate_1'] = letality_rate_1
+combined['letality_rate_2'] = letality_rate_2
+combined.head()
+
+# ordenando por taxa de  letalidade
+combined.sort_values('letality_rate_1', ascending = False).head(10)
+
+# péssima forma de visualizar, casos confirmados >>> taxa de letalidade (quase 0)
+combined[['confirmed', 'letality_rate_1']].plot(figsize = (14, 6))
+
+import seaborn as sns
+
+# scaaterplot
+plt.figure(figsize = (12, 6))
+sns.scatterplot(data = combined, x = 'confirmed', y = 'letality_rate_1')
+
+# apenas os países com mais de 40 casos confirmados
+plt.figure(figsize = (12, 6))
+sns.scatterplot(data = combined.query('confirmed > 40'), x = 'confirmed', y = 'letality_rate_1')
+
+# letality_rate_2
+plt.figure(figsize = (12, 6))
+sns.scatterplot(data = combined.query('recovered > 40'), x = 'confirmed', y = 'letality_rate_2')
+
+# distribuição
+plt.figure(figsize = (12, 6))
+sns.distplot(combined.query('confirmed > 40')['letality_rate_1'], kde = False)
+
+# distribuição
+plt.figure(figsize = (12, 6))
+sns.distplot(combined.query('recovered > 40')['letality_rate_2'], kde = False)
+
+combined.sort_values('letality_rate_1', ascending = False).query('confirmed > 40').head(10)
 
