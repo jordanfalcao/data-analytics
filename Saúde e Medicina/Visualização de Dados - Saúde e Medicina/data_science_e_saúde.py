@@ -209,8 +209,8 @@ print('A primeira estimativa (otimista) da taxa de letalidade é: {:.3f}%'.forma
 display(sum_up)
 
 # letalidade por país
-letality_rate_1 = combined['deaths'] / combined['confirmed']
-letality_rate_2 = combined['deaths'] / (combined['deaths'] + combined['recovered'])
+letality_rate_1 = 100 * combined['deaths'] / combined['confirmed']
+letality_rate_2 = 100 * combined['deaths'] / (combined['deaths'] + combined['recovered'])
 combined['letality_rate_1'] = letality_rate_1
 combined['letality_rate_2'] = letality_rate_2
 combined.head()
@@ -364,7 +364,16 @@ combined.join(un_population_total).sort_values('confirmed', ascending = False).l
 """### Procedimento do Curso, Mainland China != China."""
 
 # .str.contains() para identificar todas Locations com China incluso
-un_population.query('Location.str.contains("China") and Time == 2019', engine = 'python')
+# un_population.query('Location.str.contains("China") and Time == 2019', engine = 'python')
+
+# .str.contains() para identificar todas Locations com Russia incluso
+un_population.query('Location.str.contains("Russia") and Time == 2019', engine = 'python')
+
+# .str.contains() para identificar todas Locations com Iran incluso
+un_population.query('Location.str.contains("Iran") and Time == 2019', engine = 'python')
+
+# .str.contains() para identificar todas Locations com Us incluso
+un_population.query('Location.str.contains("United States") and Time == 2019', engine = 'python')
 
 # assumindo algumas premissas
 # estamos assumindo que na UN China = John Hopkins Mainland China
@@ -378,7 +387,20 @@ un_population.query('Location.str.contains("China") and Time == 2019', engine = 
 
 # un_population_total.query('location_for_who == "Mainland China"')
 
-# un_population_total = un_population_total.set_index('location_for_who')
+# alterando outros nomes
+def rename_location(location):
+  if location == 'Russian Federation':
+    return 'Russia'
+  if location == 'Iran (Islamic Republic of)':
+    return 'Iran'
+  if location == 'United States of America':
+    return 'US'
+  return location
+
+un_population_total['location_for_who'] = un_population_total.index.map(rename_location)
+
+# inserindo o índice no DT
+un_population_total = un_population_total.set_index('location_for_who')
 
 # combined.join(un_population_total.sort_values('confirmed', ascending = False))
 
@@ -386,4 +408,59 @@ un_population.query('Location.str.contains("China") and Time == 2019', engine = 
 ### Adicionando uma nova coluna 'location_for_who' e inserindo essa informação
 """
 
-combined.join(un_population_total).sort_values('confirmed', ascending = False).loc['China']
+combined_expanded = combined.join(un_population_total).sort_values('confirmed', ascending = False).dropna()
+combined_expanded.head(20)
+
+# criando coluna com taxa de incidência por 100.000 habitantes
+# criando coluna com taxa de mortalidade por 100.000 habitantes
+# apenas para quantidade de gente testadas e considerando TODA a população
+combined_expanded['incidence_ratio'] = (combined_expanded['confirmed'] / combined_expanded['PopTotal']) * 100000
+combined_expanded['mortality_rate'] = (combined_expanded['deaths'] / combined_expanded['PopTotal']) * 100000
+combined_expanded.head(20)
+
+recovered.set_index('Country/Region').loc['France']
+
+# nos EUA de acordo com o Burden Report de influenza 2018/2019, estimativa não final
+# de acordo com as HOSPITALIZAÇÕES 
+letality_rate_hospitalization = 34157 / 490561 * 100
+
+print(f'Taxa de letalidade por hospitalização nos EUA em 2018-2019: {letality_rate_hospitalization}%')
+
+# nos EUA de acordo com o Burden Report de influenza 2018/2019, estimativa não final
+# de acordo com as VISTIAS MÉDICAS
+letality_rate_medical_visit = 34157 / 16520350 * 100
+
+print(f'Taxa de letalidade por visitas médicas nos EUA em 2018-2019: {letality_rate_medical_visit}%')
+
+# nos EUA de acordo com o Burden Report de influenza 2018/2019, estimativa não final
+# de acordo com os SINTOMÁTICOS
+letality_rate_symptomatic = 34157 / 35520883 * 100
+
+print(f'Taxa de letalidade por sintomáticos nos EUA em 2018-2019: {letality_rate_symptomatic}%')
+
+# coeficientes de incidência nos EUA, Burden Report, incluenza
+incidence_ratio_us = 35520883 / 329450000 * 100000
+mortality_rate_us = 34157 / 329450000 * 100000
+
+print(f'Coeficiente de INCIDÊNCIA de influenza nos EUA em 2018-2019 por 100.000 habitantes: {incidence_ratio_us}')
+print(f'Coeficiente de MORTALIDADE de influenza nos EUA em 2018-2019 por 100.000 habitantes: {mortality_rate_us}')
+
+confirmed.sum()[3:-2]
+
+# criando um Data Frame com os confirmados, recuperados e mortos
+grouped_per_day = pd.DataFrame([confirmed.sum()[3:-2], recovered.sum()[3:], deaths.sum()[3:]], index = ['confirmed', 'recovered', 'deaths']).T
+grouped_per_day.head()
+
+# calculando a taxa de letalidade das duas maneiras e inserindo no DF
+grouped_per_day['letality_rate_1'] = 100 *grouped_per_day['deaths'] / grouped_per_day['confirmed']
+grouped_per_day['letality_rate_2'] = 100 * grouped_per_day['deaths'] / (grouped_per_day['deaths'] + grouped_per_day['recovered'])
+grouped_per_day.head()
+
+ax1 = grouped_per_day['letality_rate_1'].plot(figsize = (12, 6))
+ax2 = grouped_per_day['letality_rate_2'].plot(figsize = (12, 6))
+plt.title('Taxa de Letalidade no mundo convergindo para o mesmo valor', fontsize = 20)
+ax1.set_xlabel('Fonte: Curso www.alura.com.br e Dados Johns Hopkins https://github.com/CSSEGISandData/COVID-19', fontsize = 12)
+ax1.set_ylabel('Porcentagem (%)', fontsize = 14)
+plt.legend(['Mortes / Casos confirmados', 'Mortes / (Mortes + Recuperados)'])
+plt.grid(linestyle = '--')
+plt.show()
