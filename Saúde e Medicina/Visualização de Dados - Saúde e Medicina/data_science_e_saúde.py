@@ -303,8 +303,8 @@ plt.show()
 summed = confirmed.groupby('is_china').sum()
 summed['delta'] = summed['3/2/20'] - summed['3/1/20']
 summed['delta'].plot(kind = 'bar')
-plt.title('Novos casos confirmados na China e no resto do mundo no dia 3/2/20.', fontsize = 18)
-plt.xticks([False, True], ['Mundo', 'China'], rotation = 0)
+plt.title('Total de casos confirmados na China e no resto do mundo no dia 3/2/20.', fontsize = 18)
+plt.xticks([False, True], ['China', 'Mundo'], rotation = 0)
 plt.show()
 
 # crescimento do dia 6/13/21 ao dia 6/14/21 na China e no mundo
@@ -324,3 +324,66 @@ plt.legend(['Mundo', 'China'])
 plt.title('Casos confirmados na China e no Mundo ao longo do tempo', fontsize = 20)
 plt.show()
 
+# diferença excluindo [latitude, longitude] : [is_us e delta] 
+differences = summed.T[2:60].diff()  # no curso filtra [2:-2]
+differences.head()
+
+# gráfico dos casos novos
+differences.dropna().plot(figsize = (12, 6))  # dropna() para retirar os nulos
+plt.title('Novos casos diários na China e no Mundo', fontsize = 20)
+plt.legend(['Mundo', 'China'])
+plt.show()
+
+# taxa de incidência calculada no dia 3/2/20
+# maneira ERRADA de calcular, pois estamos usando toda a população da China
+cases = confirmed.groupby('is_china').sum()['3/2/20'].loc[True]
+estimated_population = 1437525528
+incidence_ratio = cases / estimated_population * 100000   # a cada 100.000 habitantes
+incidence_ratio
+
+# lendo arquivo da United NAtions sobre a população mundial em 2019
+un_population = pd.read_csv('https://population.un.org/wpp/Download/Files/1_Indicators%20(Standard)/CSV_FILES/WPP2019_TotalPopulationBySex.csv')
+un_population['PopTotal'] = un_population['PopTotal'] * 1000  # os dados estavam em milhares, colocamos para a quantidade de habitantes
+un_population.head()
+
+un_population.describe()
+
+# apenas a população total em 2019
+un_population_total = un_population.query('Time == 2019')[['Location', 'PopTotal']].set_index('Location')
+un_population_total.head()
+
+# un_population.query('Time == 2019 and Location == "Brazil"')
+
+# join nos DataFrames, nesse caso inserimos apenas a coluna PopTotal no combined
+combined.join(un_population_total)
+
+# neste caso, conseguimos dar join na China (objetivo do curso)
+# porém, no curso antes era 'Mainland China', logo o join foi mal sucedido
+combined.join(un_population_total).sort_values('confirmed', ascending = False).loc['China']
+
+"""### Procedimento do Curso, Mainland China != China."""
+
+# .str.contains() para identificar todas Locations com China incluso
+un_population.query('Location.str.contains("China") and Time == 2019', engine = 'python')
+
+# assumindo algumas premissas
+# estamos assumindo que na UN China = John Hopkins Mainland China
+
+# def rename_location(location):
+#   if location == 'China':
+#     return 'Mainland China'
+#   return location
+
+# un_population_total['location_for_who'] = un_population_total.index.map(rename_location)
+
+# un_population_total.query('location_for_who == "Mainland China"')
+
+# un_population_total = un_population_total.set_index('location_for_who')
+
+# combined.join(un_population_total.sort_values('confirmed', ascending = False))
+
+"""### Acima seria o código de alteração de China para Mainland China
+### Adicionando uma nova coluna 'location_for_who' e inserindo essa informação
+"""
+
+combined.join(un_population_total).sort_values('confirmed', ascending = False).loc['China']
