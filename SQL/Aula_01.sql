@@ -149,5 +149,19 @@ WHERE gloss_qty BETWEEN 24 AND 29;
 -- pessoas contatadas via channel ('organic', 'adwords') AND no ano de 2016
 SELECT *
 FROM web_events
-WHERE channel IN ('organic', 'adwords') AND occurred_at BETWEEN '2016-01-01' AND '2016-12-31'
+WHERE channel IN ('organic', 'adwords') AND occurred_at BETWEEN '2016-01-01' AND '2017-01-01' -- em datas vai até 00h
 ORDER BY occurred_at DESC;
+
+
+-- OR
+
+-- ID dos pedidos com 'gloss_qty > 4000' OU 'poster_qty > 4000'
+SELECT id
+FROM orders
+WHERE gloss_qty > 4000 OR poster_qty > 4000;
+
+-- empresas que comecem com 'C ou W' E o contato principal contenha 'Ana ou ana' mas NÃO 'eana'
+SELECT *
+FROM accounts
+WHERE (name LIKE 'C%' OR name LIKE 'W%')
+AND ((primary_poc LIKE '%ana%' OR primary_poc LIKE '%Ana%') AND primary_poc NOT LIKE '%eana%');
