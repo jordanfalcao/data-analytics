@@ -71,6 +71,7 @@ ON a.id = o.account_id;
 
 
 -- AND substitui o WHERE, melhor a performance da busca. INNER JOIN
+-- 01
  SELECT r.name RegionName, s.name SalesRepName, a.name AcountName
  FROM region r
  JOIN sales_reps s
@@ -80,5 +81,26 @@ ON a.id = o.account_id;
  ON s.id = a.sales_rep_id
  ORDER BY a.name;
 
---
+-- apenas vendedores com nome começando com a letra 'S' e na região 'Midwest'
+-- 02
+SELECT r.name RegionName, s.name SalesRepName, a.name AcountName
+FROM region r
+JOIN sales_reps s
+ON r.id = s.region_id
+AND r.name = 'Midwest'
+JOIN accounts a
+ON s.id = a.sales_rep_id
+AND s.name LIKE 'S%' 
+ORDER BY a.name;
 
+-- sobrenome começandoc com a letra 'K'
+-- 03
+SELECT r.name RegionName, s.name SalesRepName, a.name AcountName
+FROM region r
+JOIN sales_reps s
+ON r.id = s.region_id
+AND r.name = 'Midwest'
+JOIN accounts a
+ON s.id = a.sales_rep_id
+AND s.name LIKE '% K%' 
+ORDER BY a.name;
