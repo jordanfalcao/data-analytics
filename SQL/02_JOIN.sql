@@ -104,3 +104,57 @@ JOIN accounts a
 ON s.id = a.sales_rep_id
 AND s.name LIKE '% K%' 
 ORDER BY a.name;
+
+-- nome da região, nome da conta e o preço unitário, se a quantidade > 100
+-- 04
+SELECT r.name region, a.name account, (o.total_amt_usd/o.total + 0.01) unit_price
+FROM region r
+JOIN sales_reps s
+ON r.id = s.region_id
+JOIN accounts a
+ON s.id = a.sales_rep_id
+JOIN orders o
+ON a.id = o.account_id
+AND standard_qty > 100;
+
+-- mesmo acima, com poster_qty > 50 e ordenado pelo preço unitário
+-- 05
+SELECT r.name region, a.name account, (o.total_amt_usd/o.total + 0.01) unit_price
+FROM region r
+JOIN sales_reps s
+ON r.id = s.region_id
+JOIN accounts a
+ON s.id = a.sales_rep_id
+JOIN orders o
+ON a.id = o.account_id
+AND standard_qty > 100 AND poster_qty > 50
+ORDER BY unit_price;
+
+-- ordem decrescente do preço unitário
+-- 06
+SELECT r.name region, a.name account, (o.total_amt_usd/o.total + 0.01) unit_price
+FROM region r
+JOIN sales_reps s
+ON r.id = s.region_id
+JOIN accounts a
+ON s.id = a.sales_rep_id
+JOIN orders o
+ON a.id = o.account_id
+AND standard_qty > 100 AND poster_qty > 50
+ORDER BY unit_price DESC;
+
+--
+-- 07
+SELECT DISTINCT a.name, w.channel  -- DISTINCT, apenas valroes únicos
+FROM web_events w
+JOIN accounts a
+ON a.id = w.account_id
+AND a.id = 1001;
+
+-- 4 colunas, todos os pedidos feitos em 2015
+-- 08
+SELECT o.occurred_at, a.name, o.total, o.total_amt_usd
+FROM accounts a
+JOIN orders o
+ON a.id = o.account_id
+AND o.occurred_at BETWEEN '2015-01-01' AND '2016-01-01';
