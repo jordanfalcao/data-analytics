@@ -149,3 +149,13 @@ JOIN region r
 ON r.id = s.region_id
 GROUP BY r.name
 ORDER BY num_reps;
+
+-- 04 QUIZ
+
+-- 01
+-- média de pedidos de cada tipo de papel e a conta associada
+SELECT a.name, AVG(standard_qty) AS avg_standard, AVG(poster_qty) AS avg_poster, AVG(gloss_qty) AS avg_gloss
+FROM accounts AS a
+JOIN orders AS o
+ON a.id = o.account_id
+GROUP BY a.name;
