@@ -159,3 +159,38 @@ FROM accounts AS a
 JOIN orders AS o
 ON a.id = o.account_id
 GROUP BY a.name;
+
+-- 02
+-- média dos valores gastos em cada tipo de papel e a conta associada
+SELECT a.name, AVG(standard_amt_usd) AS avg_amt_standard, AVG(poster_amt_usd) AS avg_amt_poster, 
+       AVG(gloss_amt_usd) AS avg_amt_gloss
+FROM accounts AS a
+JOIN orders AS o
+ON a.id = o.account_id
+GROUP BY a.name;
+
+-- 03
+-- quantidade de vezes que um 'channel' foi usado num 'web_event' para cada 'sales_rep'
+-- ordenar pelo maior número de ocorrência
+SELECT s.name, w.channel, COUNT(w.channel) AS num_events
+FROM sales_reps AS s
+JOIN accounts AS a
+ON s.id = a.sales_rep_id
+JOIN web_events AS w
+ON a.id = w.account_id
+GROUP BY s.name, w.channel
+ORDER BY num_events DESC;
+
+-- 04
+-- quantidade de vezes que um 'channel' foi usado num 'web_event' para cada 'region'
+-- ordenar pelo maior número de ocorrência
+SELECT r.name, w.channel, COUNT(w.channel) AS num_events
+FROM sales_reps AS s
+JOIN accounts AS a
+ON s.id = a.sales_rep_id
+JOIN web_events AS w
+ON a.id = w.account_id
+JOIN region AS r
+ON r.id = s.region_id
+GROUP BY r.name, w.channel
+ORDER BY num_events DESC;
