@@ -78,8 +78,6 @@ HAVING SUM(o.total_amt_usd) = (
 
 -- 03
 -- Quantas contas tiveram mais compras totais do que o nome da conta que comprou mais standard_qty
--- How many accounts had more total purchases than the account name 
--- which has bought the most standard_qty paper throughout their lifetime as a customer?
 SELECT COUNT(*)
 FROM(
     SELECT a.name
@@ -95,4 +93,45 @@ FROM(
                                 GROUP BY 1
                                 ORDER BY 2 DESC
                                 LIMIT 1) As t1)) t2
+
+-- 04
+-- para o cliente que gastou maior valor 'total_amt_usd', quantos 'web_events' para cada 'channel'
+SELECT a.name, w.channel, COUNT(*)
+FROM accounts a
+JOIN web_events w 
+ON a.id = w.account_id
+AND a.id = (SELECT id
+            FROM(SELECT a.id, a.name, SUM(total_amt_usd) AS total_amt
+                FROM orders o
+                JOIN accounts a
+                ON a.id = o.account_id
+                GROUP BY 1, 2
+                ORDER BY 3 DESC
+                LIMIT 1) AS t1)
+GROUP BY 1, 2;
+
+-- 05
+-- qual a média de gasto das 10 contas que mais gastaram
+SELECT AVG(total_amt)
+FROM(SELECT a.name, SUM(total_amt_usd) AS total_amt
+FROM orders o
+JOIN accounts a
+ON a.id = o.account_id
+GROUP BY 1
+ORDER BY 2 DESC
+LIMIT 10) AS t1
+
+-- 06
+-- média de 'total_amt_usd' apenas das contas que gastaram mais que a média de todos os pedidos
+SELECT AVG(avg_amt) AS total_avg_amt
+FROM(SELECT a.id, AVG(o.total_amt_usd) AS avg_amt
+    FROM orders o
+    JOIN accounts a
+    ON a.id = o.account_id
+    GROUP BY 1
+    HAVING AVG(total_amt_usd) > (SELECT AVG(total_amt_usd) avg_all
+		FROM orders)) AS t1
+
+
+
 
