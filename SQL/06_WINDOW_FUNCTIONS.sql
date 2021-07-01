@@ -95,3 +95,48 @@ SELECT id,
        MAX(total_amt_usd) OVER account_year_window AS max_total_amt_usd
 FROM orders
 WINDOW account_year_window AS (PARTITION BY account_id ORDER BY DATE_TRUNC('year',occurred_at))
+
+-------------------------------------------------------------------------------
+-- LAG e LEAD: funções usadas para comparar linhas com as linhas anteriores (LAG) e posteriores (LEAD)
+-- LAG(column) OVER (ORDER BY column) AS column_name, cria coluna que apresenta os resultados das LINHAS anteriores (atraso)
+-- LEAD(column) OVER (ORDER BY column) AS column_name
+
+-- 04 QUIZ
+
+-- 01
+-- determinar como a receita total do pedido atual se compara com a receita total do próximo pedido
+WITH t1 as (
+    SELECT occurred_at, SUM(total_amt_usd) AS total_sum
+    FROM orders
+    GROUP BY 1
+)
+SELECT occurred_at, total_sum, LEAD(total_sum) OVER (ORDER BY occurred_at) AS lead,
+    LEAD(total_sum) OVER (ORDER BY occurred_at) - total_sum AS lead_differnece
+FROM t1
+
+------------------------------------------------------------------------------
+-- NTILE(number) OVER (ORDER BY column) AS column_name
+-- classifica a coluna em quantidades iguais de linhas de acordo com o ntile atribuido e o número de linhas
+
+-- 05 QUIZ
+
+-- 01
+-- usar a função NTILE para dividir cada conta em 4 níveis em relação a 'standard_qty', tbm mostrar a data 
+SELECT account_id, occurred_at, standard_qty,
+    NTILE(4) OVER (PARTITION BY account_id ORDER BY standard_qty) AS quartile
+FROM orders
+ORDER BY 1 DESC
+
+-- 02
+-- usar a função NTILE para dividir cada conta em 2 níveis em relação a 'gloss_qty', tbm mostrar a data 
+SELECT account_id, occurred_at, gloss_qty,
+    NTILE(2) OVER (PARTITION BY account_id ORDER BY gloss_qty) AS gloss_half
+FROM orders
+ORDER BY 1 DESC
+
+-- 03
+-- usar a função NTILE para dividir cada conta em 100 níveis em relação a 'total_amt_usd', tbm mostrar a data
+SELECT account_id, occurred_at, total_amt_usd,
+    NTILE(100) OVER (PARTITION BY account_id ORDER BY total_amt_usd) AS total_percentile
+FROM orders
+ORDER BY 1 DESC
